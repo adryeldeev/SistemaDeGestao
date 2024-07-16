@@ -1,10 +1,9 @@
 import React from "react";
-import { GrUpdate } from "react-icons/gr";
-import { RiDeleteBin6Line } from "react-icons/ri";
 import { TableIcon } from "./TableStyled";
 import { Link } from "react-router-dom";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
-const Table = ({ clients }) => {
+const Table = ({ clients, onEdit, onDelete }) => {
   if (!Array.isArray(clients)) {
     return null; // Ou uma mensagem de erro, se preferir
   }
@@ -20,8 +19,7 @@ const Table = ({ clients }) => {
             <th scope="col">Celular</th>
             <th scope="col">Data</th>
             <th scope="col">Horário</th>
-            <th scope="col">Atualizar</th>
-            <th scope="col">Deletar</th>
+            <th scope="col">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -34,7 +32,9 @@ const Table = ({ clients }) => {
               <tr key={client.id}>
                 <th scope="row">{client.id}</th>
                 <td>
-                  <Link to={`/servicos/${client.id}`}>{client.nome}</Link>
+                  <Link to={`/servicos/${client.id}`} className="linkTable">
+                    {client.nome}
+                  </Link>
                 </td>
                 <td>{client.sobrenome}</td>
                 <td>{client.celular}</td>
@@ -42,11 +42,15 @@ const Table = ({ clients }) => {
                   {new Date(client.dataCadastro).toLocaleDateString("pt-BR")}
                 </td>
                 <td>{client.horario}</td>
-                <td className="table-icons">
-                  <GrUpdate />
-                </td>
-                <td className="table-icons">
-                  <RiDeleteBin6Line />
+                <td>
+                  <FaEdit
+                    style={{ cursor: "pointer", marginRight: "10px" }}
+                    onClick={() => onEdit(client)}
+                  />
+                  <FaTrash
+                    style={{ cursor: "pointer" }}
+                    onClick={() => onDelete(client.id)}
+                  />
                 </td>
               </tr>
             ))

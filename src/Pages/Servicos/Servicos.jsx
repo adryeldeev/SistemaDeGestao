@@ -1,31 +1,35 @@
 import React, { useState, useEffect, Fragment } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Api from "../../Api/Api";
 import { useModal } from "../../Context/ModalContext";
 import {
   ButtonServico,
   DivServicos,
+  InfoServico,
   ModalBackdrop,
   ModalContainer,
   ModalContent,
   OptionsServicos,
   TableServico,
 } from "./ServicosStyled";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
+import Buttons from "../../Components/Buttons/Buttons";
+import NavItens from "../../Components/NavItens/NavItens";
 
 const Servicos = () => {
   const { isOpen, openModal, closeModal } = useModal();
   const { id } = useParams();
-
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [servicos, setServicos] = useState([]);
   const [servicosDisponiveis, setServicosDisponiveis] = useState([]);
-  const [selectedServiceId, setSelectedServiceId] = useState("");
+  const [selectedServiceName, setSelectedServiceName] = useState("");
   const [selectedValue, setSelectedValue] = useState(0);
   const [total, setTotal] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [servicoAtual, setServicoAtual] = useState(null);
+  const [clienteNome, setClienteNome] = useState("");
 
   useEffect(() => {
     const fetchServicos = async () => {
@@ -52,7 +56,7 @@ const Servicos = () => {
         if (response.status === 200) {
           setServicosDisponiveis(response.data);
           if (response.data.length > 0) {
-            setSelectedServiceId(""); // Inicializa sem serviço selecionado
+            setSelectedServiceName(""); // Inicializa sem serviço selecionado
             setSelectedValue(response.data[0].preco);
           }
         }
@@ -61,16 +65,28 @@ const Servicos = () => {
       }
     };
 
+    const fetchClienteNome = async () => {
+      try {
+        const response = await Api.get(`/clientes/${id}`);
+        if (response.status === 200) {
+          setClienteNome(response.data.nome);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar nome do cliente:", error);
+      }
+    };
+
     fetchServicos();
     fetchServicosCatalogo();
+    fetchClienteNome();
   }, [id]);
 
   const handleServiceChange = (e) => {
-    const selectedId = e.target.value;
+    const selectedName = e.target.value;
     const service = servicosDisponiveis.find(
-      (servico) => servico.id === parseInt(selectedId)
+      (servico) => servico.nome === selectedName
     );
-    setSelectedServiceId(selectedId);
+    setSelectedServiceName(selectedName);
     setSelectedValue(service.preco);
   };
 
@@ -84,7 +100,7 @@ const Servicos = () => {
     setSubmitting(true);
 
     const service = servicosDisponiveis.find(
-      (servico) => servico.id === parseInt(selectedServiceId)
+      (servico) => servico.nome === selectedServiceName
     );
 
     const serviceData = {
@@ -159,7 +175,7 @@ const Servicos = () => {
     );
     setServicoAtual(servico);
     setIsEditing(true);
-    setSelectedServiceId(service ? service.id : "");
+    setSelectedServiceName(service ? service.nome : "");
     setSelectedValue(servico.valor); // Define o valor atual do serviço
     openModal();
   };
@@ -167,7 +183,7 @@ const Servicos = () => {
   const closeModalAndReset = () => {
     setServicoAtual(null);
     setIsEditing(false);
-    setSelectedServiceId(""); // Limpa o serviço selecionado ao fechar o modal
+    setSelectedServiceName(""); // Limpa o serviço selecionado ao fechar o modal
     setSelectedValue(0); // Limpa o valor selecionado ao fechar o modal
     closeModal();
   };
@@ -176,12 +192,44 @@ const Servicos = () => {
     return <p>Carregando...</p>;
   }
 
+  const handleListServico = () => {
+    navigate(`/servicos/${id}`);
+  };
+
+  const handleSearchServico = () => {
+    navigate(`/buscarservicodocliente/${id}`);
+  };
+
+  const buttons = [
+    {
+      label: "Lista de servico do cliente",
+      icon: FaListUl,
+      onClick: handleListServico,
+    },
+    {
+      label: "Buscar servico do cliente",
+      icon: FaSearch,
+      onClick: handleSearchServico,
+    },
+  ];
+
   return (
     <Fragment>
-      <h1>Serviços do Cliente {id}</h1>
+      <NavItens />
+      <h1>Serviços do Cliente {clienteNome}</h1>
       <DivServicos>
         <OptionsServicos>
-          <h1>Serviços</h1>
+          <InfoServico>
+            <div className="Infocomunic">
+              <FaListUl />
+              <h2>Lista de Serviços</h2>
+            </div>
+            <span>
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Aspernatur, animi?
+            </span>
+          </InfoServico>
+          <Buttons buttons={buttons} />
           <ButtonServico>
             <button
               type="button"
@@ -239,15 +287,14 @@ const Servicos = () => {
                       </td>
                     </tr>
                   ))}
-                  <tr>
-                    <td colSpan="6">Total:</td>
-                    <td>{total.toFixed(2)}</td>
-                  </tr>
                 </tbody>
               </table>
+              <div className="total">
+                <strong>Total:</strong> {total.toFixed(2)}
+              </div>
             </TableServico>
           ) : (
-            <p>Não há serviços cadastrados.</p>
+            <p>Não há serviços para este cliente.</p>
           )}
         </OptionsServicos>
       </DivServicos>
@@ -255,81 +302,88 @@ const Servicos = () => {
         <ModalBackdrop onClick={closeModalAndReset}>
           <ModalContainer onClick={(e) => e.stopPropagation()}>
             <ModalContent>
-              <h2>{isEditing ? "Editar Serviço" : "Cadastrar Serviço"}</h2>
               <form onSubmit={handleSubmit}>
-                <div>
-                  <label>Serviço:</label>
+                <div className="form-group">
+                  <label htmlFor="servico">Serviço:</label>
                   <select
-                    name="servico"
-                    value={selectedServiceId}
+                    id="servico"
+                    className="form-control"
+                    value={selectedServiceName}
                     onChange={handleServiceChange}
                     required
                   >
-                    <option value="" disabled>
-                      Selecione um serviço
-                    </option>
+                    <option value="">Selecione um serviço</option>
                     {servicosDisponiveis.map((servico) => (
-                      <option key={servico.id} value={servico.id}>
+                      <option key={servico.id} value={servico.nome}>
                         {servico.nome}
                       </option>
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label>Data (realizada em):</label>
+                <div className="form-group">
+                  <label htmlFor="data">Data:</label>
                   <input
                     type="date"
-                    name="data"
+                    id="data"
+                    className="form-control"
                     required
-                    defaultValue={
-                      isEditing
-                        ? new Date(servicoAtual.realizadoEm)
-                            .toISOString()
-                            .split("T")[0]
-                        : ""
-                    }
                   />
                 </div>
-                <div>
-                  <label>Quantidade:</label>
+                <div className="form-group">
+                  <label htmlFor="quantidade">Quantidade:</label>
                   <input
                     type="number"
-                    name="quantidade"
+                    id="quantidade"
+                    className="form-control"
+                    min="1"
                     required
-                    defaultValue={isEditing ? servicoAtual.quantidade : ""}
                   />
                 </div>
-                <div>
-                  <label>Valor:</label>
+                <div className="form-group">
+                  <label htmlFor="valor">Valor:</label>
                   <input
                     type="number"
-                    name="valor"
+                    id="valor"
+                    className="form-control"
                     value={selectedValue}
-                    onChange={(e) => setSelectedValue(e.target.value)} // Permitir edição do valor
-                    readOnly={!isEditing} // Somente leitura se não estiver editando
+                    readOnly
                   />
                 </div>
-                <div>
-                  <label>Desconto:</label>
+                <div className="form-group">
+                  <label htmlFor="desconto">Desconto:</label>
                   <input
                     type="number"
-                    name="desconto"
-                    defaultValue={isEditing ? servicoAtual.desconto : 0}
+                    id="desconto"
+                    className="form-control"
+                    defaultValue="0"
+                    min="0"
                   />
                 </div>
-                <div>
-                  <label>Funcionário:</label>
+                <div className="form-group">
+                  <label htmlFor="funcionario">Funcionário:</label>
                   <input
                     type="text"
-                    name="funcionario"
+                    id="funcionario"
+                    className="form-control"
                     required
-                    defaultValue={isEditing ? servicoAtual.funcionario : ""}
                   />
                 </div>
-                <button type="submit" disabled={submitting}>
-                  {submitting ? "Enviando..." : "Salvar"}
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={submitting}
+                >
+                  {submitting
+                    ? "Salvando..."
+                    : isEditing
+                    ? "Atualizar Serviço"
+                    : "Adicionar Serviço"}
                 </button>
-                <button type="button" onClick={closeModalAndReset}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={closeModalAndReset}
+                >
                   Cancelar
                 </button>
               </form>

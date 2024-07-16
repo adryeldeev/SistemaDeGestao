@@ -19,6 +19,7 @@ input {
     outline:0;
     padding-left:15px;
     font-size:25px;
+    text-decoration:none;
 
 }
 `
@@ -43,6 +44,17 @@ padding:60px 0;
     border-top:3px solid #ccc;
     padding-top:10px;
   
+}
+.navLink{
+  text-decoration:none;
+  color:#000;
+   
+ 
+}
+ 
+.navLink:hover{
+border-bottom:1px solid #ccc;
+transition: margin-right 4s ease-in-out;
 }
 
 

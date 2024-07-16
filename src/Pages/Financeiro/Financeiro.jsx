@@ -1,5 +1,7 @@
 import React, { useState, useEffect, Fragment } from "react";
 import moment from "moment";
+import { ContentDate } from "./FinanceiroStyled";
+import NavItens from "../../Components/NavItens/NavItens";
 
 const Financeiro = () => {
   const [financeData, setFinanceData] = useState([]);
@@ -43,15 +45,22 @@ const Financeiro = () => {
 
   return (
     <Fragment>
+      <NavItens />
       <h1>Financeiro</h1>
-      <div>
-        <label>De:</label>
-        <input type="date" value={startDate} onChange={handleStartDateChange} />
-      </div>
-      <div>
-        <label>Até:</label>
-        <input type="date" value={endDate} onChange={handleEndDateChange} />
-      </div>
+      <ContentDate>
+        <div>
+          <label>De:</label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={handleStartDateChange}
+          />
+        </div>
+        <div className="dateTwo">
+          <label>Até:</label>
+          <input type="date" value={endDate} onChange={handleEndDateChange} />
+        </div>
+      </ContentDate>
       {loading ? (
         <p>Carregando...</p>
       ) : financeData.length === 0 ? (

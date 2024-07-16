@@ -2,6 +2,7 @@ import React, { Fragment, useRef, useState, useEffect } from "react";
 import {
   ButtonAddServico,
   DivServico,
+  InfoCadastrarServico,
   ModalBackDrop,
   ModalContainerr,
   ModalContentt,
@@ -9,15 +10,20 @@ import {
   TableCadastro,
 } from "./CadastroServicoStyle";
 import { useModal } from "../../Context/ModalContext";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
 import Api from "../../Api/Api";
+import NavItens from "../../Components/NavItens/NavItens";
+import Buttons from "../../Components/Buttons/Buttons";
+import { useNavigate } from "react-router-dom";
 
 const CadastrarServico = () => {
+  const navigate = useNavigate();
   const { isOpen, openModal, closeModal } = useModal();
   const [servicos, setServicos] = useState([]);
   const [servicoAtual, setServicoAtual] = useState(null);
   const nomeServicoRef = useRef(null);
   const precoServicoRef = useRef(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     async function fetchServicos() {
@@ -37,7 +43,10 @@ const CadastrarServico = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
+    if (isSubmitting) {
+      return;
+    }
     const servicoAtualizado = {
       nome: nomeServicoRef.current.value,
       preco: parseFloat(precoServicoRef.current.value),
@@ -80,6 +89,8 @@ const CadastrarServico = () => {
       closeModal();
     } catch (error) {
       console.log("Erro ao enviar dados para API:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -106,13 +117,33 @@ const CadastrarServico = () => {
     }
     openModal();
   };
-
+  const handleListServico = () => {
+    navigate("/cadastroServico");
+  };
+  const handleSearchServico = () => {
+    navigate("/buscarServico");
+  };
+  const buttons = [
+    { label: "Lista de Servico", icon: FaListUl, onClick: handleListServico },
+    { label: "Buscar Servico", icon: FaSearch, onClick: handleSearchServico },
+  ];
   return (
     <Fragment>
-      <h1>Cadastrar Serviço</h1>
+      <NavItens />
+
       <DivServico>
         <OptionsServico>
-          <h1>Serviços</h1>
+          <InfoCadastrarServico>
+            <div className="Infocomunic">
+              <FaListUl />
+              <h2>Lista de Serviço</h2>
+            </div>
+            <span>
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+              Aspernatur, animi?
+            </span>
+          </InfoCadastrarServico>
+          <Buttons buttons={buttons} />
           <ButtonAddServico>
             <button
               type="button"

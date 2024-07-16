@@ -1,5 +1,22 @@
 import styled from 'styled-components'
 
+export const InfoCadastrarServico = styled.div`
+display:flex;
+flex-direction:column;
+padding:50px 0;
+
+.Infocomunic{
+    display:flex;
+
+    align-items:center;
+    text-align:center;
+ 
+    h2{
+        padding-left:20px;
+    }
+}
+`
+
 export const DivServico = styled.div`
 width:100%;
 `
@@ -9,6 +26,16 @@ with:100%;
 export const ButtonAddServico = styled.button`
 border:0;
 outline:0;
+
+input{
+outline:0;
+border:0;
+border-bottom:1px solid #ccc;
+padding:10px;
+}
+.inputSearch{
+margin-left:10px;
+}
 `
 
 export const TableCadastro =styled.div`

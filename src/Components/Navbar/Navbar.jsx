@@ -25,7 +25,7 @@ const Navbar = ({ children }) => {
                     aria-expanded="true"
                     aria-controls="collapseOne"
                   >
-                    Accordion Item #1
+                    Clientes
                   </button>
                 </h2>
                 <div
@@ -34,33 +34,18 @@ const Navbar = ({ children }) => {
                   data-bs-parent="#accordionExample"
                 >
                   <div className="accordion-body">
-                    <NavLink to="/page1">Page 1</NavLink>
+                    <NavLink to="/page1" className="navLink">
+                      Lista de clientes
+                    </NavLink>
                   </div>
-                </div>
-              </div>
-              <div className="accordion-item">
-                <h2 className="accordion-header">
-                  <button
-                    className="accordion-button collapsed"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseTwo"
-                    aria-expanded="false"
-                    aria-controls="collapseTwo"
-                  >
-                    Accordion Item #2
-                  </button>
-                </h2>
-                <div
-                  id="collapseTwo"
-                  className="accordion-collapse collapse"
-                  data-bs-parent="#accordionExample"
-                >
                   <div className="accordion-body">
-                    <NavLink to="/servicos">Page 2</NavLink>
+                    <NavLink to="/buscarCliente" className="navLink">
+                      Buscar cliente
+                    </NavLink>
                   </div>
                 </div>
               </div>
+
               <div className="accordion-item">
                 <h2 className="accordion-header">
                   <button
@@ -71,7 +56,7 @@ const Navbar = ({ children }) => {
                     aria-expanded="false"
                     aria-controls="collapseThree"
                   >
-                    Accordion Item #3
+                    Serviços
                   </button>
                 </h2>
                 <div
@@ -80,30 +65,9 @@ const Navbar = ({ children }) => {
                   data-bs-parent="#accordionExample"
                 >
                   <div className="accordion-body">
-                    <NavLink to="/cadastroServico">Page 3</NavLink>
-                  </div>
-                </div>
-              </div>
-              <div className="accordion-item">
-                <h2 className="accordion-header">
-                  <button
-                    className="accordion-button collapsed"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#collapseFour"
-                    aria-expanded="false"
-                    aria-controls="collapseFour"
-                  >
-                    Accordion Item #4
-                  </button>
-                </h2>
-                <div
-                  id="collapseFour"
-                  className="accordion-collapse collapse"
-                  data-bs-parent="#accordionExample"
-                >
-                  <div className="accordion-body">
-                    <NavLink to="/page2">Page 4</NavLink>
+                    <NavLink to="/cadastroServico" className="navLink">
+                      Lista de serviços
+                    </NavLink>
                   </div>
                 </div>
               </div>

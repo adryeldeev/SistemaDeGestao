@@ -3,6 +3,21 @@ import styled from 'styled-components'
 export const DivServicos = styled.div`
 width:100%;
 `
+export const InfoServico = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 50px 0;
+
+  .Infocomunic {
+    display: flex;
+    align-items: center;
+    text-align: center;
+
+    h2 {
+      padding-left: 20px;
+    }
+  }
+`;
 export const OptionsServicos = styled.div`
 with:100%;
 `

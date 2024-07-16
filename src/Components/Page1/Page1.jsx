@@ -11,10 +11,13 @@ import {
 } from "./ListaCliente.js";
 import { useModal } from "../../Context/ModalContext.jsx";
 import Api from "../../Api/Api.js";
+import { useNavigate } from "react-router-dom";
 
 const Page1 = () => {
+  const navigate = useNavigate();
   const { isOpen, openModal, closeModal } = useModal();
   const [clients, setClients] = useState([]);
+  const [editingClient, setEditingClient] = useState(null);
   const [newClient, setNewClient] = useState({
     nome: "",
     sobrenome: "",
@@ -22,7 +25,7 @@ const Page1 = () => {
     dataCadastro: "",
     horario: "",
   });
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fetchClients = async () => {
     try {
       const response = await Api.get("/clientes");
@@ -46,13 +49,34 @@ const Page1 = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      console.log("Enviando dados para API:", newClient);
-      const response = await Api.post("/createCliente", newClient);
+    // Verifica se já está enviando para evitar duplicações
+    if (isSubmitting) {
+      return;
+    }
 
-      if (response.status === 201) {
-        setClients((prevClients) => [...prevClients, response.data.cliente]);
+    setIsSubmitting(true); // Inicia o envio
+
+    try {
+      let response;
+      if (editingClient) {
+        response = await Api.put(
+          `/updateCliente/${editingClient.id}`,
+          newClient
+        );
+      } else {
+        response = await Api.post("/createCliente", newClient);
+      }
+
+      if (response.status === 201 || response.status === 200) {
+        fetchClients();
         closeModal();
+        setNewClient({
+          nome: "",
+          sobrenome: "",
+          celular: "",
+          dataCadastro: "",
+          horario: "",
+        }); // Limpa os campos do formulário após o envio
       } else {
         console.log("Erro ao cadastrar cliente");
       }
@@ -62,6 +86,34 @@ const Page1 = () => {
       } else {
         console.error("Erro ao enviar dados para API:", error.message);
       }
+    } finally {
+      setIsSubmitting(false); // Finaliza o envio
+    }
+  };
+
+  const handleEditClient = (client) => {
+    setEditingClient(client);
+    setNewClient(client);
+    openModal();
+  };
+
+  const handleDeleteClient = async (id) => {
+    try {
+      const response = await Api.delete(`/deleteCliente/${id}`);
+      if (response.status === 200) {
+        setClients(clients.filter((client) => client.id !== id));
+      } else {
+        console.log(`Erro ao deletar cliente com ID ${id}:`, response.data);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error(
+          `Erro ao deletar cliente com ID ${id}:`,
+          error.response.data
+        );
+      } else {
+        console.error(`Erro ao deletar cliente com ID ${id}:`, error.message);
+      }
     }
   };
 
@@ -70,11 +122,25 @@ const Page1 = () => {
   };
 
   const handleSearchClient = () => {
-    console.log("Buscar Cliente");
+    navigate("/buscarCliente");
   };
 
   const buttons = [
-    { label: "Cadastrar cliente", icon: FaPlus, onClick: openModal },
+    {
+      label: "Cadastrar cliente",
+      icon: FaPlus,
+      onClick: () => {
+        setEditingClient(null);
+        setNewClient({
+          nome: "",
+          sobrenome: "",
+          celular: "",
+          dataCadastro: "",
+          horario: "",
+        });
+        openModal();
+      },
+    },
     { label: "Lista de Clientes", icon: FaListUl, onClick: handleListClients },
     { label: "Buscar Cliente", icon: FaSearch, onClick: handleSearchClient },
   ];
@@ -101,7 +167,11 @@ const Page1 = () => {
         </span>
       </InfoTitulo>
       <Buttons buttons={buttons} />
-      <Table clients={clients} />
+      <Table
+        clients={clients}
+        onEdit={handleEditClient}
+        onDelete={handleDeleteClient}
+      />
       {isOpen && (
         <ModalBackDro onClick={closeModal}>
           <ModalCadastroContainer onClick={(e) => e.stopPropagation()}>

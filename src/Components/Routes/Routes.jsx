@@ -7,6 +7,9 @@ import { ContentContainer, MainContainer } from "../../Layout/styled.js";
 import Servicos from "../../Pages/Servicos/Servicos.jsx";
 import CadastrarServico from "../../Pages/CadastroServico/CadastrarServico.jsx";
 import Financeiro from "../../Pages/Financeiro/Financeiro.jsx";
+import BuscarCliente from "../../Pages/BuscarCliente/BuscarCliente.jsx";
+import BuscarServico from "../../Pages/BuscarServico/BuscarServico.jsx";
+import BuscarServicoDoCliente from "../../Pages/BuscarServicoDoCliente/BuscarServicoDoCliente.jsx";
 
 function RouterApp() {
   return (
@@ -16,9 +19,14 @@ function RouterApp() {
           <ContentContainer>
             <Routes>
               <Route path="/page1" element={<Page1 />} />
-              <Route path="/page2" element={<Page2 />} />
+              <Route
+                path="/buscarservicodocliente/:id"
+                element={<BuscarServicoDoCliente />}
+              />
+              <Route path="/buscarCliente" element={<BuscarCliente />} />
               <Route path="/servicos/:id" element={<Servicos />} />
               <Route path="/cadastroServico" element={<CadastrarServico />} />
+              <Route path="/buscarServico" element={<BuscarServico />} />
               <Route path="/financeiro" element={<Financeiro />} />
               <Route path="/" element={<Page1 />} />
             </Routes>
