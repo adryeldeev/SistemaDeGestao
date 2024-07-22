@@ -4,3 +4,16 @@
   box-sizing: border-box;
  
 }
+
+/* App.css ou equivalente */
+.content {
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  margin-left: 300px;/* Largura do sidebar quando aberto */
+  width: calc(100% - 300px); /* Largura do conteúdo central quando o sidebar está aberto */
+}
+
+.content.full-width {
+  margin-left: 0; /* Sem espaço quando o sidebar está fechado */
+  width: 100%; /* Largura total da tela quando o sidebar está fechado */
+  padding: 5px; /*Espaçamento */
+}

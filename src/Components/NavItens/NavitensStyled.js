@@ -20,4 +20,7 @@ export const NavbarIten = styled.div`
       padding-left: 40px;
     }
   }
+      @media (min-width:375px) and (max-width:575px) {
+      width:80%;
+}
 `;

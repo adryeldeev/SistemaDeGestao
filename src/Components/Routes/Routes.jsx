@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Navbar from "../Navbar/Navbar.jsx";
 import Page1 from "../Page1/Page1.jsx";
-import Page2 from "../Clientes/Page2.jsx";
+
 import { ContentContainer, MainContainer } from "../../Layout/styled.js";
 import Servicos from "../../Pages/Servicos/Servicos.jsx";
 import CadastrarServico from "../../Pages/CadastroServico/CadastrarServico.jsx";

@@ -21,6 +21,7 @@ padding:20px;
         padding-left:40px;
     }
 }
+  
 
 `
 
@@ -39,6 +40,8 @@ padding:50px 0;
         padding-left:20px;
     }
 }
+       @media (min-width:375px) and (max-width:575px) {
+      width:80%;
 `
 
 export const ModalBackDro = styled.div`

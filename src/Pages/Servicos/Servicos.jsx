@@ -1,7 +1,9 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Api from "../../Api/Api";
-import { useModal } from "../../Context/ModalContext";
+
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   ButtonServico,
   DivServicos,
@@ -12,12 +14,13 @@ import {
   OptionsServicos,
   TableServico,
 } from "./ServicosStyled";
-import { FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
+import { FaCheck, FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
 import Buttons from "../../Components/Buttons/Buttons";
 import NavItens from "../../Components/NavItens/NavItens";
+import { useUI } from "../../Context/UIContext";
 
 const Servicos = () => {
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen, openModal, closeModal } = useUI();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -31,32 +34,32 @@ const Servicos = () => {
   const [servicoAtual, setServicoAtual] = useState(null);
   const [clienteNome, setClienteNome] = useState("");
 
-  useEffect(() => {
-    const fetchServicos = async () => {
-      try {
-        const response = await Api.get(`/servico/cliente/${id}`);
-        if (response.status === 200) {
-          const fetchedServicos = response.data;
-          const servicosArray = Array.isArray(fetchedServicos)
-            ? fetchedServicos
-            : [];
-          setServicos(servicosArray);
-          calculateTotal(servicosArray);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar serviços:", error);
-      } finally {
-        setLoading(false);
+  const fetchServicos = async () => {
+    try {
+      const response = await Api.get(`/servico/cliente/${id}`);
+      if (response.status === 200) {
+        const fetchedServicos = response.data;
+        const servicosArray = Array.isArray(fetchedServicos)
+          ? fetchedServicos
+          : [];
+        setServicos(servicosArray);
+        calculateTotal(servicosArray);
       }
-    };
+    } catch (error) {
+      console.error("Erro ao buscar serviços:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     const fetchServicosCatalogo = async () => {
       try {
         const response = await Api.get("/servico-catalogo");
         if (response.status === 200) {
           setServicosDisponiveis(response.data);
           if (response.data.length > 0) {
-            setSelectedServiceName(""); // Inicializa sem serviço selecionado
+            setSelectedServiceName("");
             setSelectedValue(response.data[0].preco);
           }
         }
@@ -120,8 +123,10 @@ const Servicos = () => {
           `/updateServico/${servicoAtual.id}`,
           serviceData
         );
+        toast.success("Serviço atualizado com sucesso!");
       } else {
         response = await Api.post("/criarServico", serviceData);
+        toast.success("Serviço cadastrado com sucesso!");
       }
 
       if (response.status === (isEditing ? 200 : 201)) {
@@ -151,8 +156,9 @@ const Servicos = () => {
       const response = await Api.delete(`/deletarServico/${id}`);
       if (response.status === 200) {
         const updatedServicos = servicos.filter((servico) => servico.id !== id);
+        toast.success("Serviço deletado com sucesso!");
         setServicos(updatedServicos);
-        calculateTotal(updatedServicos); // Atualiza o total após a exclusão
+        calculateTotal(updatedServicos);
       } else {
         console.log("Erro ao excluir serviço");
       }
@@ -169,22 +175,53 @@ const Servicos = () => {
     setTotal(totalValue);
   };
 
+  const handleConfirm = async (id) => {
+    const servico = servicos.find((servico) => servico.id === id);
+
+    if (servico && servico.realizado) {
+      toast.warning("Serviço já está confirmado.");
+      return;
+    }
+
+    try {
+      const response = await Api.put(`/confirmarServico/${id}`, {
+        realizado: true,
+      });
+      console.log("Resposta da API:", response);
+      if (response.status === 200) {
+        setServicos((prevServicos) =>
+          prevServicos.map((servico) =>
+            servico.id === id ? { ...servico, realizado: true } : servico
+          )
+        );
+        fetchServicos(); // Atualize a lista de serviços após confirmação
+        toast.success("Serviço confirmado com sucesso!");
+      } else {
+        console.error("Erro ao confirmar serviço");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao confirmar serviço.");
+    }
+  };
+
   const handleEdit = (servico) => {
     const service = servicosDisponiveis.find(
       (servicoCatalogo) => servicoCatalogo.nome === servico.produtoNome
     );
+
     setServicoAtual(servico);
     setIsEditing(true);
     setSelectedServiceName(service ? service.nome : "");
-    setSelectedValue(servico.valor); // Define o valor atual do serviço
+    setSelectedValue(servico.valor);
     openModal();
   };
 
   const closeModalAndReset = () => {
     setServicoAtual(null);
     setIsEditing(false);
-    setSelectedServiceName(""); // Limpa o serviço selecionado ao fechar o modal
-    setSelectedValue(0); // Limpa o valor selecionado ao fechar o modal
+    setSelectedServiceName("");
+    setSelectedValue(0);
     closeModal();
   };
 
@@ -215,6 +252,7 @@ const Servicos = () => {
 
   return (
     <Fragment>
+      <ToastContainer />
       <NavItens />
       <h1>Serviços do Cliente {clienteNome}</h1>
       <DivServicos>
@@ -257,13 +295,16 @@ const Servicos = () => {
                 </thead>
                 <tbody>
                   {servicos.map((servico) => (
-                    <tr key={servico.id}>
-                      <th scope="row">{servico.id}</th>
+                    <tr
+                      key={servico.id}
+                      style={{
+                        backgroundColor: servico.realizado ? "#ccc" : "inherit",
+                      }}
+                    >
+                      <td>{servico.id}</td>
                       <td>{servico.produtoNome}</td>
                       <td>
-                        {new Date(servico.realizadoEm).toLocaleDateString(
-                          "pt-BR"
-                        )}
+                        {new Date(servico.realizadoEm).toLocaleDateString()}
                       </td>
                       <td>{servico.quantidade}</td>
                       <td>{servico.valor.toFixed(2)}</td>
@@ -276,28 +317,41 @@ const Servicos = () => {
                       </td>
                       <td>{servico.funcionario}</td>
                       <td>
-                        <FaEdit
+                        <button
+                          className="btn btn-success"
+                          onClick={() => handleConfirm(servico.id)}
+                          style={{ border: "0", outline: "0" }}
+                        >
+                          <FaCheck />
+                        </button>
+                        <button
+                          className="btn btn-warning"
                           onClick={() => handleEdit(servico)}
-                          style={{ cursor: "pointer", marginRight: "10px" }}
-                        />
-                        <FaTrash
+                          style={{ border: "0", outline: "0" }}
+                        >
+                          <FaEdit />
+                        </button>
+
+                        <button
+                          className="btn btn-danger"
                           onClick={() => handleDelete(servico.id)}
-                          style={{ cursor: "pointer" }}
-                        />
+                          style={{ border: "0", outline: "0" }}
+                        >
+                          <FaTrash />
+                        </button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <div className="total">
-                <strong>Total:</strong> {total.toFixed(2)}
-              </div>
+              <p>Total: R${total.toFixed(2)}</p>
             </TableServico>
           ) : (
-            <p>Não há serviços para este cliente.</p>
+            <p>Nenhum serviço cadastrado para este cliente.</p>
           )}
         </OptionsServicos>
       </DivServicos>
+
       {isOpen && (
         <ModalBackdrop onClick={closeModalAndReset}>
           <ModalContainer onClick={(e) => e.stopPropagation()}>
@@ -306,6 +360,7 @@ const Servicos = () => {
                 <div className="form-group">
                   <label htmlFor="servico">Serviço:</label>
                   <select
+                    name="produtoNome"
                     id="servico"
                     className="form-control"
                     value={selectedServiceName}

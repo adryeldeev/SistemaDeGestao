@@ -1,4 +1,6 @@
 import React, { Fragment, useRef, useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   ButtonAddServico,
   DivServico,
@@ -9,16 +11,17 @@ import {
   OptionsServico,
   TableCadastro,
 } from "./CadastroServicoStyle";
-import { useModal } from "../../Context/ModalContext";
+
 import { FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
 import Api from "../../Api/Api";
 import NavItens from "../../Components/NavItens/NavItens";
 import Buttons from "../../Components/Buttons/Buttons";
 import { useNavigate } from "react-router-dom";
+import { useUI } from "../../Context/UIContext";
 
 const CadastrarServico = () => {
   const navigate = useNavigate();
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen, openModal, closeModal } = useUI();
   const [servicos, setServicos] = useState([]);
   const [servicoAtual, setServicoAtual] = useState(null);
   const nomeServicoRef = useRef(null);
@@ -43,7 +46,7 @@ const CadastrarServico = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (isSubmitting) {
       return;
     }
@@ -67,6 +70,7 @@ const CadastrarServico = () => {
                 : servico
             )
           );
+          toast.success("Serviço atualizado com sucesso!");
         } else {
           console.log("Erro ao atualizar serviço");
         }
@@ -82,6 +86,7 @@ const CadastrarServico = () => {
             ...prevServicos,
             novoServicoAdicionado,
           ]);
+          toast.success("Serviço cadastrado com sucesso!");
         } else {
           console.log("Erro ao cadastrar serviço");
         }
@@ -101,6 +106,7 @@ const CadastrarServico = () => {
         setServicos((prevServicos) =>
           prevServicos.filter((servico) => servico.id !== id)
         );
+        toast.success("Serviço deletado com sucesso!");
       } else {
         console.log("Erro ao excluir serviço");
       }
@@ -129,6 +135,7 @@ const CadastrarServico = () => {
   ];
   return (
     <Fragment>
+      <ToastContainer />
       <NavItens />
 
       <DivServico>
@@ -181,14 +188,33 @@ const CadastrarServico = () => {
                         : "N/A"}
                     </td>
                     <td>
-                      <FaEdit
+                      <button
+                        className="btn btn-warning"
                         onClick={() => handleEdit(servico)}
-                        style={{ cursor: "pointer", marginRight: "10px" }}
-                      />
-                      <FaTrash
+                        style={{
+                          cursor: "pointer",
+                          marginRight: "10px",
+                          cursor: "pointer",
+                          border: "0",
+                          outline: "none",
+                        }}
+                      >
+                        <FaEdit />
+                      </button>
+
+                      <button
+                        className="btn btn-danger"
                         onClick={() => handleDelete(servico.id)}
-                        style={{ cursor: "pointer" }}
-                      />
+                        style={{
+                          cursor: "pointer",
+                          marginRight: "10px",
+                          cursor: "pointer",
+                          border: "0",
+                          outline: "none",
+                        }}
+                      >
+                        <FaTrash />
+                      </button>
                     </td>
                   </tr>
                 ))}

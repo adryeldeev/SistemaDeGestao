@@ -1,11 +1,13 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { useModal } from "../../Context/ModalContext";
+
 import { useNavigate, useParams } from "react-router-dom";
 import Api from "../../Api/Api";
 import Buttons from "../../Components/Buttons/Buttons";
 import NavItens from "../../Components/NavItens/NavItens";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   ButtonBuscarServicoCliente,
   ContainerBuscarServicoCliente,
@@ -18,9 +20,10 @@ import {
   ModalContentServicoCliente,
   TableServicoCliente,
 } from "./BuscarServCliente";
+import { useUI } from "../../Context/UIContext";
 
 const BuscarServicoDoCliente = () => {
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen, openModal, closeModal } = useUI();
   const { id } = useParams();
 
   const [loading, setLoading] = useState(true);
@@ -121,8 +124,10 @@ const BuscarServicoDoCliente = () => {
           `/updateServico/${servicoAtual.id}`,
           serviceData
         );
+        toast.success("Serviço atualizado com sucesso!");
       } else {
         response = await Api.post("/criarServico", serviceData);
+        toast.success("Serviço cadastrado com sucesso!");
       }
 
       if (response.status === (isEditing ? 200 : 201)) {
@@ -154,6 +159,7 @@ const BuscarServicoDoCliente = () => {
         const updatedServicos = servicos.filter((servico) => servico.id !== id);
         setServicos(updatedServicos);
         calculateTotal(updatedServicos); // Atualiza o total após a exclusão
+        toast.success("Serviço deletado com sucesso!");
       } else {
         console.log("Erro ao excluir serviço");
       }
@@ -286,14 +292,30 @@ const BuscarServicoDoCliente = () => {
                     </td>
                     <td>{servico.funcionario}</td>
                     <td>
-                      <FaEdit
+                      <button
                         onClick={() => handleEdit(servico)}
-                        style={{ cursor: "pointer", marginRight: "10px" }}
-                      />
-                      <FaTrash
+                        style={{
+                          cursor: "pointer",
+                          marginRight: "10px",
+                          border: "0",
+                          outline: "0",
+                        }}
+                        className="btn btn-warning"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
                         onClick={() => handleDelete(servico.id)}
-                        style={{ cursor: "pointer" }}
-                      />
+                        className="btn btn-danger"
+                        style={{
+                          cursor: "pointer",
+                          marginRight: "10px",
+                          border: "0",
+                          outline: "0",
+                        }}
+                      >
+                        <FaTrash />
+                      </button>
                     </td>
                   </tr>
                 ))}

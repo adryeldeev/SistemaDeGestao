@@ -18,7 +18,8 @@ import {
   ModalContainerServico,
   ModalContentServico,
 } from "./BuscarServico";
-import { useModal } from "../../Context/ModalContext";
+
+import { useUI } from "../../Context/UIContext";
 
 const BuscarServico = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const BuscarServico = () => {
   const [searchResults, setSearchResults] = useState([]);
   const nomeServicoRef = useRef(null);
   const precoServicoRef = useRef(null);
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen, openModal, closeModal } = useUI();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -197,14 +198,32 @@ const BuscarServico = () => {
                     : "N/A"}
                 </td>
                 <td>
-                  <FaEdit
+                  <button
+                    className="btn btn-warning"
                     onClick={() => handleEdit(servico)}
-                    style={{ cursor: "pointer", marginRight: "10px" }}
-                  />
-                  <FaTrash
+                    style={{
+                      cursor: "pointer",
+                      marginRight: "10px",
+                      cursor: "pointer",
+                      border: "0",
+                      outline: "none",
+                    }}
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    className="btn btn btn-danger"
                     onClick={() => handleDelete(servico.id)}
-                    style={{ cursor: "pointer" }}
-                  />
+                    style={{
+                      cursor: "pointer",
+                      marginRight: "10px",
+                      cursor: "pointer",
+                      border: "0",
+                      outline: "none",
+                    }}
+                  >
+                    <FaTrash />
+                  </button>
                 </td>
               </tr>
             ))}

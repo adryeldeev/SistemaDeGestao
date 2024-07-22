@@ -17,10 +17,12 @@ import { useNavigate } from "react-router-dom";
 import Table from "../../Components/Table/Table";
 import Api from "../../Api/Api";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { useModal } from "../../Context/ModalContext";
+
+import { useUI } from "../../Context/UIContext";
+import NavItens from "../../Components/NavItens/NavItens";
 
 const BuscarCliente = () => {
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen, openModal, closeModal } = useUI();
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -146,15 +148,7 @@ const BuscarCliente = () => {
 
   return (
     <Fragment>
-      <NavbarIten>
-        <FaListUl />
-        <div className="itens">
-          <FaUser className="FaUser" />
-          <div className="iten">
-            <FaPowerOff className="FaPowerOff" />
-          </div>
-        </div>
-      </NavbarIten>
+      <NavItens />
       <InfoBuscar>
         <div className="Infocomunic">
           <FaSearch />

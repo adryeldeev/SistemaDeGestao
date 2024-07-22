@@ -9,13 +9,17 @@ import {
   ModalCadastroContent,
   NavbarItens,
 } from "./ListaCliente.js";
-import { useModal } from "../../Context/ModalContext.jsx";
+
 import Api from "../../Api/Api.js";
 import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useUI } from "../../Context/UIContext.jsx";
+import NavItens from "../NavItens/NavItens.jsx";
 
 const Page1 = () => {
   const navigate = useNavigate();
-  const { isOpen, openModal, closeModal } = useModal();
+  const { isOpen, openModal, closeModal } = useUI();
   const [clients, setClients] = useState([]);
   const [editingClient, setEditingClient] = useState(null);
   const [newClient, setNewClient] = useState({
@@ -63,8 +67,10 @@ const Page1 = () => {
           `/updateCliente/${editingClient.id}`,
           newClient
         );
+        toast.success("Cliente atualizado com sucesso!");
       } else {
         response = await Api.post("/createCliente", newClient);
+        toast.success("Cliente cadastrado com sucesso!");
       }
 
       if (response.status === 201 || response.status === 200) {
@@ -102,6 +108,7 @@ const Page1 = () => {
       const response = await Api.delete(`/deleteCliente/${id}`);
       if (response.status === 200) {
         setClients(clients.filter((client) => client.id !== id));
+        toast.success("Cliente deletado com sucesso!");
       } else {
         console.log(`Erro ao deletar cliente com ID ${id}:`, response.data);
       }
@@ -147,15 +154,8 @@ const Page1 = () => {
 
   return (
     <Fragment>
-      <NavbarItens>
-        <FaListUl />
-        <div className="itens">
-          <FaUser className="FaUser" />
-          <div className="iten">
-            <FaPowerOff className="FaPowerOff" />
-          </div>
-        </div>
-      </NavbarItens>
+      <ToastContainer />
+      <NavItens />
       <InfoTitulo>
         <div className="Infocomunic">
           <FaListUl />

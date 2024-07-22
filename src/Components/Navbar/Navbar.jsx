@@ -2,11 +2,14 @@ import React, { Fragment } from "react";
 import { NavLink } from "react-router-dom";
 import perfil from "../../assets/img/Avatar.png";
 import { InfoButtons, InfoDash, InfoPerfil, Perfil } from "./Navbar";
+import { useUI } from "../../Context/UIContext";
 
 const Navbar = ({ children }) => {
+  const { isOpenSidebar } = useUI();
+
   return (
     <Fragment>
-      <InfoDash>
+      <InfoDash isOpen={isOpenSidebar}>
         <Perfil>
           <InfoPerfil>
             <img src={perfil} alt="Avatar" />
@@ -30,7 +33,7 @@ const Navbar = ({ children }) => {
                 </h2>
                 <div
                   id="collapseOne"
-                  className="accordion-collapse collapse show"
+                  className="accordion-collapse collapse"
                   data-bs-parent="#accordionExample"
                 >
                   <div className="accordion-body">
@@ -81,7 +84,9 @@ const Navbar = ({ children }) => {
           </InfoButtons>
         </Perfil>
       </InfoDash>
-      {children}
+      <main className={`content ${!isOpenSidebar ? "full-width" : ""}`}>
+        {children}
+      </main>
     </Fragment>
   );
 };
