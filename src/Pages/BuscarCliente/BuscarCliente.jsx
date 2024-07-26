@@ -159,7 +159,7 @@ const BuscarCliente = () => {
           animi?
         </span>
       </InfoBuscar>
-      <Buttons buttons={buttons} />
+      <Buttons buttons={buttons} className="buttons" />
       <ContentInputSearch>
         <ContainerInput>
           <label htmlFor="search" id="search">
@@ -185,7 +185,7 @@ const BuscarCliente = () => {
           <span>
             Resultado da pesquisa <strong>{`"${searchQuery}"`}</strong>
           </span>
-          <button onClick={() => setSearchResults(clients)}>
+          <button onClick={() => setSearchResults(clients)} className="buttonDelete">
             <RiDeleteBin6Line className="riDeleteBin6Line" />
             EXCLUIR PESQUISA
           </button>

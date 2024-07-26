@@ -35,10 +35,6 @@ export const TableIcon = styled.div`
     border-bottom: 1px solid #ddd;
   }
 
-  @media (max-width: 575px) {
-    .table {
-      display: block;
-      width: auto; /* Deixe a largura da tabela automática */
-    }
-  }
+  
+  
 `;

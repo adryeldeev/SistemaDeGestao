@@ -34,14 +34,18 @@ export const InfoBuscar = styled.div`
 
     h2 {
       padding-left: 20px;
-    }
-  }
+}
+
+}
+
 `;
 
 export const ContentInputSearch = styled.div`
   width: 100%;
   height: 30vh;
   border: 1px solid #ccc;
+
+  
 `;
 
 export const ContainerInput = styled.div`
@@ -74,11 +78,13 @@ color:#fff;
       margin-right: 10px; /* Add space between icon and text */
     }
   }
+   
 `;
 
 export const ButtonSearch = styled.div`
   display: flex;
   padding: 10px;
+  
 `;
 
       
@@ -110,6 +116,8 @@ font-size:12.5px;
       font-size: 12.5px;
       margin-right: 10px; /* Add space between icon and text */
     }
+  }
+    
   }
 `
 

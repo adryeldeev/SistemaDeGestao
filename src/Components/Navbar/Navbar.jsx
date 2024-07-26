@@ -1,8 +1,9 @@
 import React, { Fragment } from "react";
 import { NavLink } from "react-router-dom";
 import perfil from "../../assets/img/Avatar.png";
-import { InfoButtons, InfoDash, InfoPerfil, Perfil } from "./Navbar";
+import { InfoDash, InfoPerfil, Perfil } from "./Navbar";
 import { useUI } from "../../Context/UIContext";
+import { InfoButtons } from "./Navbar";
 
 const Navbar = ({ children }) => {
   const { isOpenSidebar } = useUI();

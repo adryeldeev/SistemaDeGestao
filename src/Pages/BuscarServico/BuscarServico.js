@@ -36,12 +36,20 @@ export const InfoBuscarServico = styled.div`
       padding-left: 20px;
     }
   }
+    
 `;
 
 export const ContentBuscarServico= styled.div`
   width: 100%;
   height: 30vh;
   border: 1px solid #ccc;
+   @media (max-width: 576px) {
+  margin-top:40px;
+  width:90%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  }
 `;
 
 export const ContainerBuscarServico = styled.div`
@@ -74,6 +82,7 @@ color:#fff;
       margin-right: 10px; /* Add space between icon and text */
     }
   }
+     
 `;
 
 export const ButtonBuscarServico= styled.div`

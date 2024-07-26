@@ -40,8 +40,7 @@ padding:50px 0;
         padding-left:20px;
     }
 }
-       @media (min-width:375px) and (max-width:575px) {
-      width:80%;
+      
 `
 
 export const ModalBackDro = styled.div`
@@ -54,6 +53,7 @@ export const ModalBackDro = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+   
 `;
 
 export const ModalCadastroContainer = styled.div`
