@@ -133,7 +133,7 @@ const BuscarCliente = () => {
   };
 
   const handleListClients = () => {
-    navigate("/page1");
+    navigate("/listadecliente");
   };
 
   const handleSearchClient = () => {
@@ -185,7 +185,10 @@ const BuscarCliente = () => {
           <span>
             Resultado da pesquisa <strong>{`"${searchQuery}"`}</strong>
           </span>
-          <button onClick={() => setSearchResults(clients)} className="buttonDelete">
+          <button
+            onClick={() => setSearchResults(clients)}
+            className="buttonDelete"
+          >
             <RiDeleteBin6Line className="riDeleteBin6Line" />
             EXCLUIR PESQUISA
           </button>

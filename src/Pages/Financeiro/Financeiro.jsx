@@ -14,7 +14,7 @@ const Financeiro = () => {
       setLoading(true);
       try {
         const response = await fetch(
-          `http://localhost:8000/financas/total-por-periodo?startDate=${startDate}&endDate=${endDate}`
+          `https://backendsistemasalao.onrender.com/financas/total-por-periodo?startDate=${startDate}&endDate=${endDate}`
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");

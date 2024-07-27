@@ -1,9 +1,9 @@
 import axios from 'axios'
 
-export const urlApi = 'http://localhost:8000/';
+export const urlApi = 'https://backendsistemasalao.onrender.com/';
 
 const Api = axios.create({
-    baseURL:'http://localhost:8000/',
+    baseURL:'https://backendsistemasalao.onrender.com/',
     
 })
 

@@ -38,7 +38,7 @@ const Navbar = ({ children }) => {
                   data-bs-parent="#accordionExample"
                 >
                   <div className="accordion-body">
-                    <NavLink to="/page1" className="navLink">
+                    <NavLink to="/listadecliente" className="navLink">
                       Lista de clientes
                     </NavLink>
                   </div>

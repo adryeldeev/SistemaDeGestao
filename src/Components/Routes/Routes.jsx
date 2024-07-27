@@ -18,7 +18,7 @@ function RouterApp() {
         <Navbar>
           <ContentContainer>
             <Routes>
-              <Route path="/page1" element={<Page1 />} />
+              <Route path="/listadecliente" element={<Page1 />} />
               <Route
                 path="/buscarservicodocliente/:id"
                 element={<BuscarServicoDoCliente />}
