@@ -1,8 +1,5 @@
-import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Navbar from "../Navbar/Navbar.jsx";
 import Page1 from "../Page1/Page1.jsx";
-
 import { ContentContainer, MainContainer } from "../../Layout/styled.js";
 import Servicos from "../../Pages/Servicos/Servicos.jsx";
 import CadastrarServico from "../../Pages/CadastroServico/CadastrarServico.jsx";
@@ -10,7 +7,7 @@ import Financeiro from "../../Pages/Financeiro/Financeiro.jsx";
 import BuscarCliente from "../../Pages/BuscarCliente/BuscarCliente.jsx";
 import BuscarServico from "../../Pages/BuscarServico/BuscarServico.jsx";
 import BuscarServicoDoCliente from "../../Pages/BuscarServicoDoCliente/BuscarServicoDoCliente.jsx";
-
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 function RouterApp() {
   return (
     <BrowserRouter>
