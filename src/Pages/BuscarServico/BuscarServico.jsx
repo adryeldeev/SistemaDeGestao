@@ -204,7 +204,6 @@ const BuscarServico = () => {
                     style={{
                       cursor: "pointer",
                       marginRight: "10px",
-                      cursor: "pointer",
                       border: "0",
                       outline: "none",
                     }}
@@ -217,7 +216,6 @@ const BuscarServico = () => {
                     style={{
                       cursor: "pointer",
                       marginRight: "10px",
-                      cursor: "pointer",
                       border: "0",
                       outline: "none",
                     }}
