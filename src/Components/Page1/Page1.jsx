@@ -28,17 +28,47 @@ const Page1 = () => {
     celular: "",
     dataCadastro: "",
     horario: "",
+    relevante: 0,
+    frequencia: 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetching clients
   const fetchClients = async () => {
     try {
       const response = await Api.get("/clientes");
       if (response.status === 200) {
-        setClients(response.data);
+        const clientsWithRelevancia = await Promise.all(
+          response.data.map(async (client) => {
+            // Obtém os serviços do cliente usando a rota apropriada
+            const servicesResponse = await Api.get(
+              `/servico/cliente/${client.id}`
+            );
+            const services = servicesResponse.data || [];
+
+            // Calcula a relevância com base na quantidade de serviços
+            const relevancia = calculateRelevancia(services);
+
+            return {
+              ...client,
+              servicos: services,
+              relevante: relevancia,
+            };
+          })
+        );
+        setClients(clientsWithRelevancia);
       }
     } catch (error) {
       console.error("Erro ao buscar clientes:", error);
     }
+  };
+
+  const calculateRelevancia = (servicos) => {
+    const totalServicos = servicos.length;
+    if(totalServicos >= 10) return 10
+    if (totalServicos >= 5) return 5;
+    if (totalServicos == 0) return 0;
+    return 0;
   };
 
   useEffect(() => {
@@ -53,12 +83,11 @@ const Page1 = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Verifica se já está enviando para evitar duplicações
     if (isSubmitting) {
       return;
     }
 
-    setIsSubmitting(true); // Inicia o envio
+    setIsSubmitting(true);
 
     try {
       let response;
@@ -70,7 +99,8 @@ const Page1 = () => {
         toast.success("Cliente atualizado com sucesso!");
       } else {
         response = await Api.post("/createCliente", newClient);
-        toast.success("Cliente cadastrado com sucesso!");
+        console.log(newClient),
+          toast.success("Cliente cadastrado com sucesso!");
       }
 
       if (response.status === 201 || response.status === 200) {
@@ -82,7 +112,8 @@ const Page1 = () => {
           celular: "",
           dataCadastro: "",
           horario: "",
-        }); // Limpa os campos do formulário após o envio
+          relevante: 0,
+        });
       } else {
         console.log("Erro ao cadastrar cliente");
       }
@@ -93,7 +124,7 @@ const Page1 = () => {
         console.error("Erro ao enviar dados para API:", error.message);
       }
     } finally {
-      setIsSubmitting(false); // Finaliza o envio
+      setIsSubmitting(false);
     }
   };
 

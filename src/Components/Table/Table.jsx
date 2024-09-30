@@ -20,6 +20,7 @@ const Table = ({ clients, onEdit, onDelete }) => {
               <th scope="col">Celular</th>
               <th scope="col">Data</th>
               <th scope="col">Horário</th>
+              <th scope="col">Relevância</th>
               <th scope="col">Ações</th>
             </tr>
           </thead>
@@ -43,6 +44,7 @@ const Table = ({ clients, onEdit, onDelete }) => {
                     {new Date(client.dataCadastro).toLocaleDateString("pt-BR")}
                   </td>
                   <td>{client.horario}</td>
+                  <td>{client.relevante}</td>
                   <td>
                     <button
                       className="btn btn-warning"

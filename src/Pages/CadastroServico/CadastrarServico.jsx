@@ -50,6 +50,7 @@ const CadastrarServico = () => {
     if (isSubmitting) {
       return;
     }
+
     const servicoAtualizado = {
       nome: nomeServicoRef.current.value,
       preco: parseFloat(precoServicoRef.current.value),
@@ -63,11 +64,10 @@ const CadastrarServico = () => {
         );
 
         if (response.status === 200) {
+          const servicoAtualizadoData = response.data.servicoCatalogo;
           setServicos((prevServicos) =>
             prevServicos.map((servico) =>
-              servico.id === servicoAtual.id
-                ? response.data.servicoCatalogo
-                : servico
+              servico.id === servicoAtual.id ? servicoAtualizadoData : servico
             )
           );
           toast.success("Serviço atualizado com sucesso!");
@@ -75,6 +75,7 @@ const CadastrarServico = () => {
           console.log("Erro ao atualizar serviço");
         }
       } else {
+        // Adiciona um novo serviço
         const response = await Api.post(
           "/criarServico-catalogo",
           servicoAtualizado
@@ -91,6 +92,7 @@ const CadastrarServico = () => {
           console.log("Erro ao cadastrar serviço");
         }
       }
+
       closeModal();
     } catch (error) {
       console.log("Erro ao enviar dados para API:", error);
@@ -123,16 +125,20 @@ const CadastrarServico = () => {
     }
     openModal();
   };
+
   const handleListServico = () => {
     navigate("/cadastroServico");
   };
+
   const handleSearchServico = () => {
     navigate("/buscarServico");
   };
+
   const buttons = [
     { label: "Lista de Servico", icon: FaListUl, onClick: handleListServico },
     { label: "Buscar Servico", icon: FaSearch, onClick: handleSearchServico },
   ];
+
   return (
     <Fragment>
       <ToastContainer />
@@ -174,6 +180,7 @@ const CadastrarServico = () => {
                   <th scope="col">ID</th>
                   <th scope="col">Serviços</th>
                   <th scope="col">Valor</th>
+
                   <th scope="col">Ações</th>
                 </tr>
               </thead>
@@ -187,6 +194,7 @@ const CadastrarServico = () => {
                         ? servico.preco.toFixed(2)
                         : "N/A"}
                     </td>
+
                     <td>
                       <button
                         className="btn btn-warning"
@@ -221,6 +229,7 @@ const CadastrarServico = () => {
           </TableCadastro>
         </OptionsServico>
       </DivServico>
+
       {isOpen && (
         <ModalBackDrop onClick={closeModal}>
           <ModalContainerr onClick={(e) => e.stopPropagation()}>

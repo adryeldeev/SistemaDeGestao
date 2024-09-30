@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Api from "../../Api/Api";
-
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -33,8 +32,8 @@ const Servicos = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [servicoAtual, setServicoAtual] = useState(null);
   const [clienteNome, setClienteNome] = useState("");
-
   const fetchServicos = async () => {
+    setLoading(true);
     try {
       const response = await Api.get(`/servico/cliente/${id}`);
       if (response.status === 200) {
@@ -42,8 +41,8 @@ const Servicos = () => {
         const servicosArray = Array.isArray(fetchedServicos)
           ? fetchedServicos
           : [];
-        setServicos(servicosArray);
         calculateTotal(servicosArray);
+        setServicos(servicosArray);
       }
     } catch (error) {
       console.error("Erro ao buscar serviços:", error);
@@ -109,13 +108,14 @@ const Servicos = () => {
     const serviceData = {
       produtoNome: service.nome,
       realizadoEm: e.target.data.value,
+      horario: e.target.horario.value,
       quantidade: parseInt(e.target.quantidade.value),
       valor: parseFloat(selectedValue),
       desconto: parseFloat(e.target.desconto.value || 0),
       funcionario: e.target.funcionario.value,
       clienteId: parseInt(id),
     };
-
+    console.log("Dados do serviço", serviceData);
     try {
       let response;
       if (isEditing && servicoAtual) {
@@ -187,14 +187,14 @@ const Servicos = () => {
       const response = await Api.put(`/confirmarServico/${id}`, {
         realizado: true,
       });
-      console.log("Resposta da API:", response);
+
       if (response.status === 200) {
         setServicos((prevServicos) =>
           prevServicos.map((servico) =>
             servico.id === id ? { ...servico, realizado: true } : servico
           )
         );
-        fetchServicos(); // Atualize a lista de serviços após confirmação
+        fetchServicos();
         toast.success("Serviço confirmado com sucesso!");
       } else {
         console.error("Erro ao confirmar serviço");
@@ -285,6 +285,7 @@ const Servicos = () => {
                     <th scope="col">ID</th>
                     <th scope="col">Serviço</th>
                     <th scope="col">Realizado em</th>
+                    <th scope="col">Horário</th>
                     <th scope="col">Qtd</th>
                     <th scope="col">Valor</th>
                     <th scope="col">Desconto</th>
@@ -306,6 +307,7 @@ const Servicos = () => {
                       <td>
                         {new Date(servico.realizadoEm).toLocaleDateString()}
                       </td>
+                      <td>{servico.horario}</td>
                       <td>{servico.quantidade}</td>
                       <td>{servico.valor.toFixed(2)}</td>
                       <td>{servico.desconto.toFixed(2)}</td>
@@ -380,6 +382,15 @@ const Servicos = () => {
                   <input
                     type="date"
                     id="data"
+                    className="form-control"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="horario">Horário:</label>
+                  <input
+                    type="time"
+                    id="horario"
                     className="form-control"
                     required
                   />
