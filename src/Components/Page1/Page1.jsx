@@ -65,7 +65,7 @@ const Page1 = () => {
 
   const calculateRelevancia = (servicos) => {
     const totalServicos = servicos.length;
-    if(totalServicos >= 10) return 10
+    if (totalServicos >= 10) return 10;
     if (totalServicos >= 5) return 5;
     if (totalServicos == 0) return 0;
     return 0;
@@ -73,6 +73,12 @@ const Page1 = () => {
 
   useEffect(() => {
     fetchClients();
+
+    const intervalId = setInterval(() => {
+      fetchClients();
+    }, 30 * 60 * 1000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleInputChange = (e) => {

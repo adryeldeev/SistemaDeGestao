@@ -38,56 +38,42 @@ export const ModalBackdrop = styled.div`
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 `;
 
 export const ModalContainer = styled.div`
   background: white;
-  padding: 20px;
   border-radius: 8px;
-  width: 500px;
-  max-width: 100%;
-  `;
-  
-  export const ModalContent = styled.div`
-  display: flex;
-  flex-direction: column;
+  padding: 20px;
+  max-width: 500px; 
+  max-height: 80vh; 
+  overflow-y: auto; 
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+`;
 
-  form {
-    display: flex;
-    flex-direction: column;
+export const ModalContent = styled.div`
+  h2 {
+    margin-top: 0;
+  }
 
-    div {
-      margin-bottom: 10px;
+  .form-group {
+    margin-bottom: 15px;
 
-      label {
-        display: block;
-        margin-bottom: 5px;
-      }
-
-      input {
-        width: 100%;
-        padding: 8px;
-        box-sizing: border-box;
-      }
+    label {
+      display: block;
+      margin-bottom: 5px;
     }
 
-    button {
-      margin-top: 10px;
+    input,
+    select {
+      width: 100%;
       padding: 10px;
-      background: #007bff;
-      color: white;
-      border: none;
+      border: 1px solid #ccc;
       border-radius: 4px;
-      cursor: pointer;
-
-      &:nth-child(2) {
-        background: #6c757d;
-      }
     }
   }
-`
+`;
 
 export const ButtonCancel = styled.div`
 display:block;

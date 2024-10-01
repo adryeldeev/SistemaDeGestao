@@ -1,6 +1,14 @@
 import React, { useState, useEffect, Fragment } from "react";
 import moment from "moment";
-import { ContentDate } from "./FinanceiroStyled";
+import {
+  ContentDate,
+  TableContainer,
+  StyledTable,
+  StyledHeader,
+  StyledCell,
+  NoDataMessage,
+  LoadingMessage,
+} from "./FinanceiroStyled.js";
 import NavItens from "../../Components/NavItens/NavItens";
 
 const Financeiro = () => {
@@ -16,11 +24,13 @@ const Financeiro = () => {
         const response = await fetch(
           `https://backendsistemasalao.onrender.com/financas/total-por-periodo?startDate=${startDate}&endDate=${endDate}`
         );
+        console.log(response.status);
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
         if (response.status === 200) {
           const data = await response.json();
+          console.log(data);
           setFinanceData(data);
         }
       } catch (error) {
@@ -62,32 +72,32 @@ const Financeiro = () => {
         </div>
       </ContentDate>
       {loading ? (
-        <p>Carregando...</p>
+        <LoadingMessage>Carregando...</LoadingMessage>
       ) : financeData.length === 0 ? (
-        <p>Nenhum dado encontrado para o período selecionado.</p>
+        <NoDataMessage>
+          Nenhum dado encontrado para o período selecionado.
+        </NoDataMessage>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Cliente ID</th>
-              <th>Total de Serviços</th>
-              <th>Total de Valor</th>
-              <th>Total de Vendas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {financeData.map((item) => (
-              <tr key={item.data}>
-                <td>{item.data}</td>
-                <td>{item.clienteId}</td>
-                <td>{item.totalServicos}</td>
-                <td>{item.totalValor}</td>
-                <td>{item.totalVendas}</td>
+        <TableContainer>
+          <StyledTable>
+            <thead>
+              <tr>
+                <StyledHeader>Total de Serviços</StyledHeader>
+                <StyledHeader>Valor dos serviços</StyledHeader>
+                <StyledHeader>Valor total das vendas</StyledHeader>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {financeData.map((item) => (
+                <tr key={item.data}>
+                  <StyledCell>{item.totalServicos}</StyledCell>
+                  <StyledCell>{item.totalVendas}</StyledCell>
+                  <StyledCell>{item.totalValor}</StyledCell>
+                </tr>
+              ))}
+            </tbody>
+          </StyledTable>
+        </TableContainer>
       )}
     </Fragment>
   );
