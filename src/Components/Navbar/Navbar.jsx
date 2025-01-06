@@ -1,11 +1,14 @@
-import React, { Fragment } from "react";
+import  { Fragment } from "react";
+import PropTypes from 'prop-types'
 import { NavLink } from "react-router-dom";
 import perfil from "../../assets/img/Avatar.png";
 import { InfoDash, InfoPerfil, Perfil } from "./Navbar";
 import { useUI } from "../../Context/UIContext";
 import { InfoButtons } from "./Navbar";
+import useApi from "../../Api/Api";
 
 const Navbar = ({ children }) => {
+  const auth  = useApi()
   const { isOpenSidebar } = useUI();
 
   return (
@@ -14,7 +17,7 @@ const Navbar = ({ children }) => {
         <Perfil>
           <InfoPerfil>
             <img src={perfil} alt="Avatar" />
-            <strong>Carlos Alfano</strong>
+            <strong>{auth.user?.username}</strong>
             <span>Cabeleireiro</span>
           </InfoPerfil>
           <InfoButtons>
@@ -91,5 +94,10 @@ const Navbar = ({ children }) => {
     </Fragment>
   );
 };
+
+Navbar.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 
 export default Navbar;
