@@ -3,7 +3,6 @@ import { FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
 import { useNavigate, useParams } from "react-router-dom";
-import Api from "../../Api/Api";
 import Buttons from "../../Components/Buttons/Buttons";
 import NavItens from "../../Components/NavItens/NavItens";
 import { toast, ToastContainer } from "react-toastify";
@@ -21,8 +20,9 @@ import {
   TableServicoCliente,
 } from "./BuscarServCliente";
 import { useUI } from "../../Context/UIContext";
-
+import useApi from "../../Api/Api";
 const BuscarServicoDoCliente = () => {
+  const api =useApi()
   const { isOpen, openModal, closeModal } = useUI();
   const { id } = useParams();
 
@@ -42,7 +42,7 @@ const BuscarServicoDoCliente = () => {
   useEffect(() => {
     const fetchServicos = async () => {
       try {
-        const response = await Api.get(`/servico/cliente/${id}`);
+        const response = await api.get(`/servico/cliente/${id}`);
         if (response.status === 200) {
           const fetchedServicos = response.data;
           const servicosArray = Array.isArray(fetchedServicos)
@@ -61,7 +61,7 @@ const BuscarServicoDoCliente = () => {
 
     const fetchServicosCatalogo = async () => {
       try {
-        const response = await Api.get("/servico-catalogo");
+        const response = await api.get("/servico-catalogo");
         if (response.status === 200) {
           setServicosDisponiveis(response.data);
           if (response.data.length > 0) {
@@ -120,13 +120,13 @@ const BuscarServicoDoCliente = () => {
     try {
       let response;
       if (isEditing && servicoAtual) {
-        response = await Api.put(
+        response = await api.put(
           `/updateServico/${servicoAtual.id}`,
           serviceData
         );
         toast.success("Serviço atualizado com sucesso!");
       } else {
-        response = await Api.post("/criarServico", serviceData);
+        response = await api.post("/criarServico", serviceData);
         toast.success("Serviço cadastrado com sucesso!");
       }
 
@@ -154,7 +154,7 @@ const BuscarServicoDoCliente = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await Api.delete(`/deletarServico/${id}`);
+      const response = await api.delete(`/deletarServico/${id}`);
       if (response.status === 200) {
         const updatedServicos = servicos.filter((servico) => servico.id !== id);
         setServicos(updatedServicos);

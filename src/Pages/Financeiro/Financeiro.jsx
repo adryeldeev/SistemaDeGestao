@@ -10,8 +10,10 @@ import {
   LoadingMessage,
 } from "./FinanceiroStyled.js";
 import NavItens from "../../Components/NavItens/NavItens";
+import useApi from "../../Api/Api.js";
 
 const Financeiro = () => {
+  const api = useApi()
   const [financeData, setFinanceData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState("");
@@ -21,17 +23,18 @@ const Financeiro = () => {
     async function fetchData() {
       setLoading(true);
       try {
-        const response = await fetch(
-          `https://backendsistemasalao.onrender.com/financas/total-por-periodo?startDate=${startDate}&endDate=${endDate}`
+        const response = await api.get(
+          `https://backendsistemasalao.onrender.com/financas/total-por-periodo`, 
+          {
+            params: {
+              startDate: startDate,
+              endDate: endDate
+            }
+          }
         );
-        console.log(response.status);
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
         if (response.status === 200) {
-          const data = await response.json();
-          console.log(data);
-          setFinanceData(data);
+          console.log(response.data);
+          setFinanceData(response.data);
         }
       } catch (error) {
         console.error("Error fetching data:", error);

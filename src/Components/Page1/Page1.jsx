@@ -10,14 +10,14 @@ import {
   NavbarItens,
 } from "./ListaCliente.js";
 
-import Api from "../../Api/Api.js";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useUI } from "../../Context/UIContext.jsx";
 import NavItens from "../NavItens/NavItens.jsx";
-
+import useApi from '../../Api/Api'
 const Page1 = () => {
+  const api =  useApi()
   const navigate = useNavigate();
   const { isOpen, openModal, closeModal } = useUI();
   const [clients, setClients] = useState([]);
@@ -36,12 +36,12 @@ const Page1 = () => {
   // Fetching clients
   const fetchClients = async () => {
     try {
-      const response = await Api.get("/clientes");
+      const response = await api.get("/clientes");
       if (response.status === 200) {
         const clientsWithRelevancia = await Promise.all(
           response.data.map(async (client) => {
             // Obtém os serviços do cliente usando a rota apropriada
-            const servicesResponse = await Api.get(
+            const servicesResponse = await api.get(
               `/servico/cliente/${client.id}`
             );
             const services = servicesResponse.data || [];
@@ -98,7 +98,7 @@ const Page1 = () => {
     try {
       let response;
       if (editingClient) {
-        response = await Api.put(
+        response = await api.put(
           `/updateCliente/${editingClient.id}`,
           newClient
         );
@@ -142,7 +142,7 @@ const Page1 = () => {
 
   const handleDeleteClient = async (id) => {
     try {
-      const response = await Api.delete(`/deleteCliente/${id}`);
+      const response = await api.delete(`/deleteCliente/${id}`);
       if (response.status === 200) {
         setClients(clients.filter((client) => client.id !== id));
         toast.success("Cliente deletado com sucesso!");

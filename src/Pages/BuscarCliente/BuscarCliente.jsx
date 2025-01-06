@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import  { Fragment, useEffect, useState } from "react";
 import { FaListUl, FaPowerOff, FaSearch, FaUser } from "react-icons/fa";
 import Buttons from "../../Components/Buttons/Buttons";
 import {
@@ -15,13 +15,13 @@ import {
 } from "./BuscarclienteStyled";
 import { useNavigate } from "react-router-dom";
 import Table from "../../Components/Table/Table";
-import Api from "../../Api/Api";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
 import { useUI } from "../../Context/UIContext";
 import NavItens from "../../Components/NavItens/NavItens";
-
+import useApi from '../../Api/Api'
 const BuscarCliente = () => {
+  const api = useApi()
   const { isOpen, openModal, closeModal } = useUI();
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
@@ -38,7 +38,7 @@ const BuscarCliente = () => {
   });
   const fetchClients = async () => {
     try {
-      const response = await Api.get("/clientes");
+      const response = await api.get("/clientes");
       if (response.status === 200) {
         setClients(response.data);
         setSearchResults(response.data); // Inicialmente, mostrar todos os clientes
@@ -64,12 +64,12 @@ const BuscarCliente = () => {
     try {
       let response;
       if (editingClient) {
-        response = await Api.put(
+        response = await api.put(
           `/updateCliente/${editingClient.id}`,
           newClient
         );
       } else {
-        response = await Api.post("/createCliente", newClient);
+        response = await api.post("/createCliente", newClient);
       }
 
       if (response.status === 201 || response.status === 200) {
@@ -98,7 +98,7 @@ const BuscarCliente = () => {
 
   const handleDeleteClient = async (id) => {
     try {
-      const response = await Api.delete(`/deleteCliente/${id}`);
+      const response = await api.delete(`/deleteCliente/${id}`);
       if (response.status === 200) {
         setClients(clients.filter((client) => client.id !== id));
       } else {

@@ -13,13 +13,14 @@ import {
 } from "./CadastroServicoStyle";
 
 import { FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
-import Api from "../../Api/Api";
 import NavItens from "../../Components/NavItens/NavItens";
 import Buttons from "../../Components/Buttons/Buttons";
 import { useNavigate } from "react-router-dom";
 import { useUI } from "../../Context/UIContext";
+import  useApi from '../../Api/Api'
 
 const CadastrarServico = () => {
+  const api =  useApi()
   const navigate = useNavigate();
   const { isOpen, openModal, closeModal } = useUI();
   const [servicos, setServicos] = useState([]);
@@ -31,7 +32,7 @@ const CadastrarServico = () => {
   useEffect(() => {
     async function fetchServicos() {
       try {
-        const response = await Api.get("/servico-catalogo");
+        const response = await api.get("/servico-catalogo");
         if (response.status === 200) {
           setServicos(response.data);
         } else {
@@ -58,7 +59,7 @@ const CadastrarServico = () => {
 
     try {
       if (servicoAtual) {
-        const response = await Api.put(
+        const response = await api.put(
           `/servicoCatalogoUpdate/${servicoAtual.id}`,
           servicoAtualizado
         );
@@ -76,7 +77,7 @@ const CadastrarServico = () => {
         }
       } else {
         // Adiciona um novo serviço
-        const response = await Api.post(
+        const response = await api.post(
           "/criarServico-catalogo",
           servicoAtualizado
         );
@@ -103,7 +104,7 @@ const CadastrarServico = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await Api.delete(`/servicoCatalogoDelete/${id}`);
+      const response = await api.delete(`/servicoCatalogoDelete/${id}`);
       if (response.status === 200) {
         setServicos((prevServicos) =>
           prevServicos.filter((servico) => servico.id !== id)

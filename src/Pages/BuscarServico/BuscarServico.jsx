@@ -5,7 +5,6 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import Buttons from "../../Components/Buttons/Buttons";
 import NavItens from "../../Components/NavItens/NavItens";
 
-import Api from "../../Api/Api";
 import { useNavigate } from "react-router-dom";
 import {
   ButtonBuscarServico,
@@ -20,8 +19,10 @@ import {
 } from "./BuscarServico";
 
 import { useUI } from "../../Context/UIContext";
+import useApi from "../../Api/Api";
 
 const BuscarServico = () => {
+  const api = useApi()
   const navigate = useNavigate();
   const [servico, setServico] = useState([]);
   const [servicoAtual, setServicoAtual] = useState(null);
@@ -41,7 +42,7 @@ const BuscarServico = () => {
 
     try {
       if (servicoAtual) {
-        const response = await Api.put(
+        const response = await api.put(
           `/servicoCatalogoUpdate/${servicoAtual.id}`,
           servicoAtualizado
         );
@@ -58,7 +59,7 @@ const BuscarServico = () => {
           console.log("Erro ao atualizar serviço");
         }
       } else {
-        const response = await Api.post(
+        const response = await api.post(
           "/criarServico-catalogo",
           servicoAtualizado
         );
@@ -82,10 +83,10 @@ const BuscarServico = () => {
   useEffect(() => {
     async function fetchServicos() {
       try {
-        const response = await Api.get("/servico-catalogo");
+        const response = await api.get("/servico-catalogo");
         if (response.status === 200) {
           setServico(response.data);
-          setSearchResults(response.data); // Inicialmente, mostrar todos os serviços
+          setSearchResults(response.data); 
         } else {
           console.log("Erro ao buscar serviços:", response.error);
         }
@@ -103,7 +104,7 @@ const BuscarServico = () => {
   };
   const handleDelete = async (id) => {
     try {
-      const response = await Api.delete(`/servicoCatalogoDelete/${id}`);
+      const response = await api.delete(`/servicoCatalogoDelete/${id}`);
       if (response.status === 200) {
         setServico((prevServicos) =>
           prevServicos.filter((servico) => servico.id !== id)

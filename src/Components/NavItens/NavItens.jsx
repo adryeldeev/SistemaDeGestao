@@ -1,9 +1,11 @@
 import React, { Fragment } from "react";
 import { NavbarIten } from "./NavitensStyled";
-import { FaPowerOff, FaUser, FaExchangeAlt } from "react-icons/fa";
+import { FaPowerOff, FaExchangeAlt } from "react-icons/fa";
 import { useUI } from "../../Context/UIContext";
+import useApi from "../../Api/Api";
 
 const NavItens = () => {
+  const auth = useApi()
   const { isOpenSidebar, openSidebar, closeSidebar } = useUI();
 
   const toggleSidebar = () => {
@@ -19,9 +21,11 @@ const NavItens = () => {
       <NavbarIten>
         <FaExchangeAlt style={{ cursor: "pointer" }} onClick={toggleSidebar} />
         <div className="itens">
-          <FaUser className="FaUser" />
+          
           <div className="iten">
+            <button  onClick={() => auth.logOut()}>
             <FaPowerOff className="FaPowerOff" />
+            </button>
           </div>
         </div>
       </NavbarIten>
