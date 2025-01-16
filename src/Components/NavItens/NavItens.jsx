@@ -1,11 +1,10 @@
-import React, { Fragment } from "react";
-import { NavbarIten } from "./NavitensStyled";
+import { Fragment } from "react";
+import { Button, NavbarIten } from "./NavitensStyled";
 import { FaPowerOff, FaExchangeAlt } from "react-icons/fa";
 import { useUI } from "../../Context/UIContext";
-import useApi from "../../Api/Api";
-
+import { useAuth } from "../../Context/authHelpers.jsx";
 const NavItens = () => {
-  const auth = useApi()
+  const auth = useAuth(); // Use o hook correto aqui
   const { isOpenSidebar, openSidebar, closeSidebar } = useUI();
 
   const toggleSidebar = () => {
@@ -21,11 +20,10 @@ const NavItens = () => {
       <NavbarIten>
         <FaExchangeAlt style={{ cursor: "pointer" }} onClick={toggleSidebar} />
         <div className="itens">
-          
           <div className="iten">
-            <button  onClick={() => auth.logOut()}>
-            <FaPowerOff className="FaPowerOff" />
-            </button>
+            <Button onClick={() => auth.logOut()}> {/* Agora auth.logOut estará definido */}
+              <FaPowerOff className="FaPowerOff" />
+            </Button>
           </div>
         </div>
       </NavbarIten>

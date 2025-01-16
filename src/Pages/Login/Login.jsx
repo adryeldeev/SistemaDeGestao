@@ -3,8 +3,8 @@
   import { TbLockPassword } from "react-icons/tb";
   import { useState } from 'react';
   import { NavLink } from 'react-router-dom';
-import { useAuth } from '../../Context/AuthProvider';
 import { ButtonLogin, ContentLogin, DivInputsLogin, DivLinks, FormLogin, InfoContentLogin, InputLogin, LinkPassword, TitleLogin } from "./LoginStyled";
+import { useAuth } from "../../Context/authHelpers.jsx";
   
   const Login = () => {
     const [input, setInput] = useState({

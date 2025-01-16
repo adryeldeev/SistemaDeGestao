@@ -1,4 +1,3 @@
-import React from "react";
 import { FaPlus, FaListUl, FaSearch } from "react-icons/fa";
 import { Button } from "./ButtonsStyle";
 

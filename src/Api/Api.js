@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-import { useAuth } from '../Context/AuthProvider';
+import { useAuth } from '../Context/authHelpers.jsx';
 
 export const urlApi = 'https://backendsistemasalao.onrender.com/';
 

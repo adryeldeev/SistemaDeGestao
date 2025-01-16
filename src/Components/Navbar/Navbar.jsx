@@ -5,10 +5,10 @@ import perfil from "../../assets/img/Avatar.png";
 import { InfoDash, InfoPerfil, Perfil } from "./Navbar";
 import { useUI } from "../../Context/UIContext";
 import { InfoButtons } from "./Navbar";
-import useApi from "../../Api/Api";
+import { useAuth } from './../../Context/authHelpers.jsx';
 
 const Navbar = ({ children }) => {
-  const auth  = useApi()
+  const auth  = useAuth()
   const { isOpenSidebar } = useUI();
 
   return (

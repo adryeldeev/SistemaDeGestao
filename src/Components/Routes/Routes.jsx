@@ -14,12 +14,13 @@ import CadastroUser from "../../Pages/CadastrarUser/CadastrarUser.jsx";
 import RecuperarSenha from "../../Pages/RecuperarSenha/RecuperarSenha.jsx";
 import RedefinirSenha from './../../Pages/RedefinirSenha/RedefinirSenha';
 import PrivateRoute from './PrivateRoute.jsx';
+import ListaDeCliente from "../../Pages/ListaDeCliente/ListaDeCliente.jsx";
 
 function RouterApp() {
   return (
-    <Router basename="/SistemaDeGestao">
+    <Router >
     <AuthProvider>
-      <MainContainer>
+          <MainContainer>
         <Routes>
           {/* Rotas públicas */}
           <Route path="/login" element={<Login />} />
@@ -33,10 +34,10 @@ function RouterApp() {
               path="/*"
               element={
                 <>
+                <ContentContainer>
                   <Navbar />
-                  <ContentContainer>
                     <Routes>
-                      <Route path="/listadecliente" element={<Page1 />} />
+                      <Route path="/listadecliente" element={<ListaDeCliente />} />
                       <Route
                         path="/buscarservicodocliente/:id"
                         element={<BuscarServicoDoCliente />}

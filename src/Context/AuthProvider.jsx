@@ -1,18 +1,22 @@
-import { createContext, useContext, useState } from "react";
+import PropTypes from "prop-types";
+import axios from "axios";
+import { createContext, useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [error, setError] = useState('');
   const [token, setToken] = useState(localStorage.getItem("site") || "");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const loginAction = async (data) => {
+  const loginAction = useCallback(async (data) => {
+    setIsLoading(true);
+    setError("");
     try {
-      const response = await axios.post("https://backendsistemasalao.onrender.com/login", data, {
+      const response = await axios.post("http://localhost:8000/login", data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -23,36 +27,52 @@ const AuthProvider = ({ children }) => {
       if (res.token) {
         setToken(res.token);
         localStorage.setItem("site", res.token);
-
-        // Update user data directly from the login response
-        setUser(res.userData); // Set user data from login response
-
-        navigate("/"); // Redirects after successful login
+        setUser(res.userData);
+        navigate("/");
       } else {
         throw new Error(res.message || "Login failed");
       }
     } catch (err) {
-      console.error("Login failed:", err.message);
-      setError(err.message); // Display error in the form
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [navigate]);
 
-  const logOut = () => {
+  const logOut = useCallback(() => {
     setUser(null);
     setToken("");
     localStorage.removeItem("site");
     navigate("/login");
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    const validateToken = async () => {
+      if (token) {
+        try {
+          const response = await axios.get("http://localhost:8000/validation", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUser(response.data.userData);
+        } catch (err) {
+          logOut();
+        }
+      }
+    };
+
+    validateToken();
+  }, [token, logOut]);
 
   return (
-    <AuthContext.Provider value={{ token, user, loginAction, logOut }}>
+    <AuthContext.Provider value={{ token, user, loginAction, logOut, isLoading, error }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export default AuthProvider;
-
-export const useAuth = () => {
-  return useContext(AuthContext);
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
+
+export default AuthProvider;
+export { AuthContext }; 

@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "../../Context/AuthProvider";
+import { useAuth } from "../../Context/authHelpers";
 
 const PrivateRoute = () => {
   const { token } = useAuth();  // Acessando o token diretamente a partir do context

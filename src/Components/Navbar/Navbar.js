@@ -37,6 +37,9 @@ export const InfoDash = styled.div`
   z-index: 1000; /* Garante que o sidebar fique acima do conteúdo */
   @media (min-width:375px) and (max-width:575px) {
   display:none;
+  strong{
+ margin-rigth:50px;
+  }
 }
 `;
 
