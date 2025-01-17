@@ -5,10 +5,11 @@ import { AiOutlineMail } from "react-icons/ai";
 import { TbLockPassword } from "react-icons/tb";
 import { ContentCadastro, DivInput, FormCadastro, InfoCadastro, TituloCadastro } from "./CadastrarUserStyled";
 import Button from "../../Components/Button/Button";
-import axios from "axios";
 import InputField from './../../Components/InputField/InputField';
+import useApi from "../../Api/Api";
 
 const CadastroUser = () => {
+  const api = useApi()
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -37,11 +38,7 @@ const CadastroUser = () => {
     setError("");
   
     try {
-      const response = await axios.post("https://backendsistemasalao.onrender.com/createUser", formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await api.post("/createUser", formData);  
   
       if (response.status === 201) {
         navigate("/login"); // Redireciona após sucesso
