@@ -50,7 +50,7 @@ const CadastroUser = () => {
       }
     } catch (err) {
       console.error("Cadastro falhou:", err);
-      setError(err.response?.data?.message || "Erro ao cadastrar usuário")
+      setError(err.response?.data?.message || "Erro ao cadastrar usuário");
     }
   };
   return (
