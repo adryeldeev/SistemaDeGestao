@@ -37,7 +37,7 @@ const CadastroUser = () => {
     setError("");
   
     try {
-      const response = await axios.post("http://localhost:8000/createUser", formData, {
+      const response = await axios.post("https://backendsistemasalao.onrender.com/createUser", formData, {
         headers: {
           "Content-Type": "application/json",
         },
