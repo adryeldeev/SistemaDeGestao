@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import  { Fragment, useEffect, useRef, useState } from "react";
 import { FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
@@ -34,21 +34,21 @@ const BuscarServico = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const servicoAtualizado = {
       nome: nomeServicoRef.current.value,
       preco: parseFloat(precoServicoRef.current.value),
     };
-
+  
     try {
       if (servicoAtual) {
         const response = await api.put(
           `/servicoCatalogoUpdate/${servicoAtual.id}`,
           servicoAtualizado
         );
-
-        if (response.status === 200) {
-          setServicos((prevServicos) =>
+  
+        if (response.status === 200 && Array.isArray(response.data.servicoCatalogo)) {
+          setServico((prevServicos) =>
             prevServicos.map((servico) =>
               servico.id === servicoAtual.id
                 ? response.data.servicoCatalogo
@@ -56,22 +56,22 @@ const BuscarServico = () => {
             )
           );
         } else {
-          console.log("Erro ao atualizar serviço");
+          console.log("Erro ao atualizar serviço, resposta inesperada:", response.data);
         }
       } else {
         const response = await api.post(
           "/criarServico-catalogo",
           servicoAtualizado
         );
-
-        if (response.status === 200) {
+        console.log("Resposta da API:", response);
+        if (response.status === 200 && Array.isArray(response.data.servicoCatalogo)) {
           const novoServicoAdicionado = response.data.servicoCatalogo;
           setServico((prevServicos) => [
             ...prevServicos,
             novoServicoAdicionado,
           ]);
         } else {
-          console.log("Erro ao cadastrar serviço");
+          console.log("Erro ao cadastrar serviço, resposta inesperada:", response.data);
         }
       }
       closeModal();
@@ -79,16 +79,20 @@ const BuscarServico = () => {
       console.log("Erro ao enviar dados para API:", error);
     }
   };
+  
 
   useEffect(() => {
     async function fetchServicos() {
       try {
         const response = await api.get("/servico-catalogo");
-        if (response.status === 200) {
-          setServico(response.data);
-          setSearchResults(response.data); 
+        console.log("Resposta da API:", response);
+        
+        // Verifica se a chave 'data' existe e se é um array
+        if (response.status === 200 && Array.isArray(response.data.data)) {
+          setServico(response.data.data);  
+          setSearchResults(response.data.data); 
         } else {
-          console.log("Erro ao buscar serviços:", response.error);
+          console.log("Erro: A resposta não contém um array", response.data);
         }
       } catch (error) {
         console.log("Erro ao buscar serviços:", error);

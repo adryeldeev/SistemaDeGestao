@@ -17,8 +17,10 @@ const Navbar = ({ children }) => {
         <Perfil>
           <InfoPerfil>
             <img src={perfil} alt="Avatar" />
-            <strong>{auth.user?.username}</strong>
-            <span>Cabeleireiro</span>
+            <span>Bem vindo,  <strong>
+              {auth.user?.username}
+              </strong>
+              </span>
           </InfoPerfil>
           <InfoButtons>
             <div className="accordion" id="accordionExample">

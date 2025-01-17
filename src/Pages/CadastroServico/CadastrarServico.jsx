@@ -33,10 +33,12 @@ const CadastrarServico = () => {
     async function fetchServicos() {
       try {
         const response = await api.get("/servico-catalogo");
-        if (response.status === 200) {
-          setServicos(response.data);
+        console.log("Serviços recebidos da API:", response.data);
+  
+        if (Array.isArray(response.data.data)) {
+          setServicos(response.data.data);  // Acessa 'data' dentro de 'response.data'
         } else {
-          console.log("Erro ao buscar serviços:", response.error);
+          console.log("Erro: A resposta não contém um array esperado", response.data);
         }
       } catch (error) {
         console.log("Erro ao buscar serviços:", error);
