@@ -1,5 +1,5 @@
 import  { Fragment, useEffect, useState } from "react";
-import { FaListUl, FaPowerOff, FaSearch, FaUser } from "react-icons/fa";
+import { FaListUl, FaSearch, } from "react-icons/fa";
 import Buttons from "../../Components/Buttons/Buttons";
 import {
   ButtonSearch,
@@ -11,7 +11,7 @@ import {
   ModalBackDroop,
   ModalBuscarContainer,
   ModalBuscarContent,
-  NavbarIten,
+ 
 } from "./BuscarclienteStyled";
 import { useNavigate } from "react-router-dom";
 import Table from "../../Components/Table/Table";
@@ -54,13 +54,11 @@ const BuscarCliente = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Verifica se já está enviando para evitar duplicações
     if (isSubmitting) {
       return;
     }
 
-    setIsSubmitting(true); // Inicia o envio
-
+    setIsSubmitting(true); 
     try {
       let response;
       if (editingClient) {

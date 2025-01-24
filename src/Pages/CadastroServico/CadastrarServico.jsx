@@ -1,4 +1,4 @@
-import React, { Fragment, useRef, useState, useEffect } from "react";
+import  { Fragment, useRef, useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -36,7 +36,7 @@ const CadastrarServico = () => {
         console.log("Serviços recebidos da API:", response.data);
   
         if (Array.isArray(response.data.data)) {
-          setServicos(response.data.data);  // Acessa 'data' dentro de 'response.data'
+          setServicos(response.data.data); 
         } else {
           console.log("Erro: A resposta não contém um array esperado", response.data);
         }
@@ -49,23 +49,23 @@ const CadastrarServico = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (isSubmitting) {
-      return;
-    }
-
+  
+    if (isSubmitting) return;
+  
+    setIsSubmitting(true); // Define como true antes da requisição
+  
     const servicoAtualizado = {
       nome: nomeServicoRef.current.value,
       preco: parseFloat(precoServicoRef.current.value),
     };
-
+  
     try {
       if (servicoAtual) {
         const response = await api.put(
           `/servicoCatalogoUpdate/${servicoAtual.id}`,
           servicoAtualizado
         );
-
+  
         if (response.status === 200) {
           const servicoAtualizadoData = response.data.servicoCatalogo;
           setServicos((prevServicos) =>
@@ -75,15 +75,14 @@ const CadastrarServico = () => {
           );
           toast.success("Serviço atualizado com sucesso!");
         } else {
-          console.log("Erro ao atualizar serviço");
+          throw new Error("Erro ao atualizar serviço");
         }
       } else {
-        // Adiciona um novo serviço
         const response = await api.post(
           "/criarServico-catalogo",
           servicoAtualizado
         );
-
+  
         if (response.status === 200) {
           const novoServicoAdicionado = response.data.servicoCatalogo;
           setServicos((prevServicos) => [
@@ -92,15 +91,16 @@ const CadastrarServico = () => {
           ]);
           toast.success("Serviço cadastrado com sucesso!");
         } else {
-          console.log("Erro ao cadastrar serviço");
+          throw new Error("Erro ao cadastrar serviço");
         }
       }
-
+  
       closeModal();
     } catch (error) {
-      console.log("Erro ao enviar dados para API:", error);
+      toast.error("Erro ao enviar dados para API");
+      console.error(error);
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // Define como false ao finalizar
     }
   };
 
