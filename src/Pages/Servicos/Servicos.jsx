@@ -38,6 +38,7 @@ const Servicos = () => {
     try {
       const response = await api.get(`/servico/cliente/${id}`);
       if (response.status === 200) {
+        console.log("Resposta da API:", response.data);
         const fetchedServicos = response.data;
         const servicosArray = Array.isArray(fetchedServicos)
           ? fetchedServicos
