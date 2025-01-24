@@ -58,7 +58,7 @@ const Servicos = () => {
       try {
         const response = await api.get("/servico-catalogo");
         if (response.status === 200) {
-          setServicosDisponiveis(response.data);
+          setServicosDisponiveis(Array.isArray(response.data) ? response.data : []);
           if (response.data.length > 0) {
             setSelectedServiceName("");
             setSelectedValue(response.data[0].preco);
