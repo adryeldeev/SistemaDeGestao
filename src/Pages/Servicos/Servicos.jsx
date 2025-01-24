@@ -19,10 +19,11 @@ import { useUI } from "../../Context/UIContext";
 import useApi from "../../Api/Api";
 
 const Servicos = () => {
-  const api =  useApi()
+  const api = useApi();
   const { isOpen, openModal, closeModal } = useUI();
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const [servicos, setServicos] = useState([]);
   const [servicosDisponiveis, setServicosDisponiveis] = useState([]);
@@ -33,98 +34,86 @@ const Servicos = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [servicoAtual, setServicoAtual] = useState(null);
   const [clienteNome, setClienteNome] = useState("");
-  const fetchServicos = async () => {
-    setLoading(true);
-    try {
-      const response = await api.get(`/servico/cliente/${id}`);
-      if (response.status === 200) {
-        console.log("Resposta da API:", response.data);
-        const fetchedServicos = response.data;
-        const servicosArray = Array.isArray(fetchedServicos)
-          ? fetchedServicos
-          : [];
-        calculateTotal(servicosArray);
-        setServicos(servicosArray);
-      }
-    } catch (error) {
-      console.error("Erro ao buscar serviços:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    const fetchServicosCatalogo = async () => {
+    const fetchInitialData = async () => {
+      setLoading(true);
       try {
-        const response = await api.get("/servico-catalogo");
-        if (response.status === 200) {
-          setServicosDisponiveis(Array.isArray(response.data) ? response.data : []);
-          if (response.data.length > 0) {
+        const [servicosResponse, catalogoResponse, clienteResponse] = await Promise.all([
+          api.get(`/servico/cliente/${id}`),
+          api.get("/servico-catalogo"),
+          api.get(`/clientes/${id}`),
+        ]);
+
+        if (servicosResponse.status === 200) {
+          const fetchedServicos = Array.isArray(servicosResponse.data) ? servicosResponse.data : [];
+          setServicos(fetchedServicos);
+          calculateTotal(fetchedServicos);
+        }
+
+        if (catalogoResponse.status === 200) {
+          setServicosDisponiveis(Array.isArray(catalogoResponse.data) ? catalogoResponse.data : []);
+          if (catalogoResponse.data.length > 0) {
             setSelectedServiceName("");
-            setSelectedValue(response.data[0].preco);
+            setSelectedValue(catalogoResponse.data[0].preco);
           }
         }
-      } catch (error) {
-        console.error("Erro ao buscar catálogo de serviços:", error);
-      }
-    };
 
-    const fetchClienteNome = async () => {
-      try {
-        const response = await api.get(`/clientes/${id}`);
-        if (response.status === 200) {
-          setClienteNome(response.data.nome);
+        if (clienteResponse.status === 200) {
+          setClienteNome(clienteResponse.data.nome);
         }
       } catch (error) {
-        console.error("Erro ao buscar nome do cliente:", error);
+        console.error("Erro ao buscar dados iniciais:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchServicos();
-    fetchServicosCatalogo();
-    fetchClienteNome();
+    fetchInitialData();
   }, [id]);
+
+  const calculateTotal = (services) => {
+    const totalValue = services.reduce(
+      (acc, servico) => acc + servico.valor * servico.quantidade - servico.desconto,
+      0
+    );
+    setTotal(totalValue);
+  };
 
   const handleServiceChange = (e) => {
     const selectedName = e.target.value;
-    const service = servicosDisponiveis.find(
-      (servico) => servico.nome === selectedName
-    );
+    const service = servicosDisponiveis.find((servico) => servico.nome === selectedName);
     setSelectedServiceName(selectedName);
-    setSelectedValue(service.preco);
+    setSelectedValue(service ? service.preco : 0);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (submitting) {
-      return;
-    }
-
+    if (submitting) return;
     setSubmitting(true);
 
-    const service = servicosDisponiveis.find(
-      (servico) => servico.nome === selectedServiceName
-    );
-
-    const serviceData = {
-      produtoNome: service.nome,
-      realizadoEm: e.target.data.value,
-      horario: e.target.horario.value,
-      quantidade: parseInt(e.target.quantidade.value),
-      valor: parseFloat(selectedValue),
-      desconto: parseFloat(e.target.desconto.value || 0),
-      funcionario: e.target.funcionario.value,
-      clienteId: parseInt(id),
-    };
-    console.log("Dados do serviço", serviceData);
     try {
+      const service = servicosDisponiveis.find((s) => s.nome === selectedServiceName);
+      if (!service) {
+        toast.error("Selecione um serviço válido.");
+        return;
+      }
+
+      const serviceData = {
+        produtoNome: service.nome,
+        realizadoEm: e.target.data.value,
+        horario: e.target.horario.value,
+        quantidade: parseInt(e.target.quantidade.value, 10),
+        valor: parseFloat(selectedValue),
+        desconto: parseFloat(e.target.desconto.value || 0),
+        funcionario: e.target.funcionario.value,
+        clienteId: parseInt(id, 10),
+      };
+
       let response;
       if (isEditing && servicoAtual) {
-        response = await api.put(
-          `/updateServico/${servicoAtual.id}`,
-          serviceData
-        );
+        response = await api.put(`/updateServico/${servicoAtual.id}`, serviceData);
         toast.success("Serviço atualizado com sucesso!");
       } else {
         response = await api.post("/criarServico", serviceData);
@@ -133,21 +122,18 @@ const Servicos = () => {
 
       if (response.status === (isEditing ? 200 : 201)) {
         const updatedService = response.data;
-        setServicos((prevServicos) => {
+        setServicos((prev) => {
           const updatedServicos = isEditing
-            ? prevServicos.map((servico) =>
-                servico.id === updatedService.id ? updatedService : servico
-              )
-            : [...prevServicos, updatedService];
+            ? prev.map((s) => (s.id === updatedService.id ? updatedService : s))
+            : [...prev, updatedService];
           calculateTotal(updatedServicos);
           return updatedServicos;
         });
         closeModalAndReset();
-      } else {
-        console.log("Erro ao salvar serviço");
       }
     } catch (error) {
-      console.log("Erro ao enviar dados para API:", error);
+      toast.error("Erro ao salvar serviço.");
+      console.error(error);
     } finally {
       setSubmitting(false);
     }
@@ -158,63 +144,37 @@ const Servicos = () => {
       const response = await api.delete(`/deletarServico/${id}`);
       if (response.status === 200) {
         const updatedServicos = servicos.filter((servico) => servico.id !== id);
-        toast.success("Serviço deletado com sucesso!");
         setServicos(updatedServicos);
         calculateTotal(updatedServicos);
-      } else {
-        console.log("Erro ao excluir serviço");
+        toast.success("Serviço deletado com sucesso!");
       }
     } catch (error) {
-      console.log("Erro ao excluir serviço:", error);
+      toast.error("Erro ao excluir serviço.");
+      console.error(error);
     }
-  };
-
-  const calculateTotal = (services) => {
-    const servicesArray = Array.isArray(services) ? services : [];
-    const totalValue = servicesArray.reduce((acc, servico) => {
-      return acc + servico.valor * servico.quantidade - servico.desconto;
-    }, 0);
-    setTotal(totalValue);
   };
 
   const handleConfirm = async (id) => {
-    const servico = servicos.find((servico) => servico.id === id);
-
-    if (servico && servico.realizado) {
-      toast.warning("Serviço já está confirmado.");
-      return;
-    }
-
     try {
-      const response = await api.put(`/confirmarServico/${id}`, {
-        realizado: true,
-      });
-
+      const response = await api.put(`/confirmarServico/${id}`, { realizado: true });
       if (response.status === 200) {
-        setServicos((prevServicos) =>
-          prevServicos.map((servico) =>
+        setServicos((prev) =>
+          prev.map((servico) =>
             servico.id === id ? { ...servico, realizado: true } : servico
           )
         );
-        fetchServicos();
         toast.success("Serviço confirmado com sucesso!");
-      } else {
-        console.error("Erro ao confirmar serviço");
       }
     } catch (error) {
-      console.error(error);
       toast.error("Erro ao confirmar serviço.");
+      console.error(error);
     }
   };
 
   const handleEdit = (servico) => {
-    const service = servicosDisponiveis.find(
-      (servicoCatalogo) => servicoCatalogo.nome === servico.produtoNome
-    );
-
     setServicoAtual(servico);
     setIsEditing(true);
-    setSelectedServiceName(service ? service.nome : "");
+    setSelectedServiceName(servico.produtoNome);
     setSelectedValue(servico.valor);
     openModal();
   };
@@ -227,30 +187,20 @@ const Servicos = () => {
     closeModal();
   };
 
-  if (loading) {
-    return <p>Carregando...</p>;
-  }
-
-  const handleListServico = () => {
-    navigate(`/servicos/${id}`);
-  };
-
-  const handleSearchServico = () => {
-    navigate(`/buscarservicodocliente/${id}`);
-  };
-
   const buttons = [
     {
-      label: "Lista de servico do cliente",
+      label: "Lista de serviço do cliente",
       icon: FaListUl,
-      onClick: handleListServico,
+      onClick: () => navigate(`/servicos/${id}`),
     },
     {
-      label: "Buscar servico do cliente",
+      label: "Buscar serviço do cliente",
       icon: FaSearch,
-      onClick: handleSearchServico,
+      onClick: () => navigate(`/buscarservicodocliente/${id}`),
     },
   ];
+
+  if (loading) return <p>Carregando...</p>;
 
   return (
     <Fragment>
@@ -264,18 +214,11 @@ const Servicos = () => {
               <FaListUl />
               <h2>Lista de Serviços</h2>
             </div>
-            <span>
-              Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-              Aspernatur, animi?
-            </span>
+            <span>Lorem ipsum dolor sit, amet consectetur adipisicing elit.</span>
           </InfoServico>
           <Buttons buttons={buttons} />
           <ButtonServico>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={openModal}
-            >
+            <button className="btn btn-primary" onClick={openModal}>
               + Adicionar
             </button>
           </ButtonServico>
@@ -284,63 +227,38 @@ const Servicos = () => {
               <table className="table">
                 <thead>
                   <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Serviço</th>
-                    <th scope="col">Realizado em</th>
-                    <th scope="col">Horário</th>
-                    <th scope="col">Qtd</th>
-                    <th scope="col">Valor</th>
-                    <th scope="col">Desconto</th>
-                    <th scope="col">Total</th>
-                    <th scope="col">Funcionário</th>
-                    <th scope="col">Ações</th>
+                    <th>ID</th>
+                    <th>Serviço</th>
+                    <th>Realizado em</th>
+                    <th>Horário</th>
+                    <th>Qtd</th>
+                    <th>Valor</th>
+                    <th>Desconto</th>
+                    <th>Total</th>
+                    <th>Funcionário</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.isArray(servicos) && servicos.map((servico) => (
-                    <tr
-                      key={servico.id}
-                      style={{
-                        backgroundColor: servico.realizado ? "#ccc" : "inherit",
-                      }}
-                    >
+                  {servicos.map((servico) => (
+                    <tr key={servico.id} style={{ backgroundColor: servico.realizado ? "#ccc" : "inherit" }}>
                       <td>{servico.id}</td>
                       <td>{servico.produtoNome}</td>
-                      <td>
-                        {new Date(servico.realizadoEm).toLocaleDateString()}
-                      </td>
+                      <td>{new Date(servico.realizadoEm).toLocaleDateString()}</td>
                       <td>{servico.horario}</td>
                       <td>{servico.quantidade}</td>
                       <td>{servico.valor.toFixed(2)}</td>
                       <td>{servico.desconto.toFixed(2)}</td>
-                      <td>
-                        {(
-                          servico.valor * servico.quantidade -
-                          servico.desconto
-                        ).toFixed(2)}
-                      </td>
+                      <td>{(servico.valor * servico.quantidade - servico.desconto).toFixed(2)}</td>
                       <td>{servico.funcionario}</td>
                       <td>
-                        <button
-                          className="btn btn-success"
-                          onClick={() => handleConfirm(servico.id)}
-                          style={{ border: "0", outline: "0" }}
-                        >
+                        <button className="btn btn-success" onClick={() => handleConfirm(servico.id)}>
                           <FaCheck />
                         </button>
-                        <button
-                          className="btn btn-warning"
-                          onClick={() => handleEdit(servico)}
-                          style={{ border: "0", outline: "0" }}
-                        >
+                        <button className="btn btn-warning" onClick={() => handleEdit(servico)}>
                           <FaEdit />
                         </button>
-
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => handleDelete(servico.id)}
-                          style={{ border: "0", outline: "0" }}
-                        >
+                        <button className="btn btn-danger" onClick={() => handleDelete(servico.id)}>
                           <FaTrash />
                         </button>
                       </td>
@@ -372,7 +290,7 @@ const Servicos = () => {
                     required
                   >
                     <option value="">Selecione um serviço</option>
-                    {Array.isArray(servicosDisponiveis) && servicosDisponiveis.map((servico) => (
+                    {servicosDisponiveis.map((servico) => (
                       <option key={servico.id} value={servico.nome}>
                         {servico.nome}
                       </option>
@@ -381,60 +299,27 @@ const Servicos = () => {
                 </div>
                 <div className="form-group">
                   <label htmlFor="data">Data:</label>
-                  <input
-                    type="date"
-                    id="data"
-                    className="form-control"
-                    required
-                  />
+                  <input type="date" id="data" className="form-control" required />
                 </div>
                 <div className="form-group">
                   <label htmlFor="horario">Horário:</label>
-                  <input
-                    type="time"
-                    id="horario"
-                    className="form-control"
-                    required
-                  />
+                  <input type="time" id="horario" className="form-control" required />
                 </div>
                 <div className="form-group">
                   <label htmlFor="quantidade">Quantidade:</label>
-                  <input
-                    type="number"
-                    id="quantidade"
-                    className="form-control"
-                    min="1"
-                    required
-                  />
+                  <input type="number" id="quantidade" className="form-control" min="1" required />
                 </div>
                 <div className="form-group">
                   <label htmlFor="valor">Valor:</label>
-                  <input
-                    type="number"
-                    id="valor"
-                    className="form-control"
-                    value={selectedValue}
-                    readOnly
-                  />
+                  <input type="number" id="valor" className="form-control" value={selectedValue} readOnly />
                 </div>
                 <div className="form-group">
                   <label htmlFor="desconto">Desconto:</label>
-                  <input
-                    type="number"
-                    id="desconto"
-                    className="form-control"
-                    defaultValue="0"
-                    min="0"
-                  />
+                  <input type="number" id="desconto" className="form-control" defaultValue="0" min="0" />
                 </div>
                 <div className="form-group">
                   <label htmlFor="funcionario">Funcionário:</label>
-                  <input
-                    type="text"
-                    id="funcionario"
-                    className="form-control"
-                    required
-                  />
+                  <input type="text" id="funcionario" className="form-control" required />
                 </div>
                 <button
                   type="submit"
