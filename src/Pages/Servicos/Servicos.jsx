@@ -1,6 +1,5 @@
-import React, { useState, useEffect, Fragment } from "react";
+import  { useState, useEffect, Fragment } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Api from "../../Api/Api";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -16,9 +15,11 @@ import {
 import { FaCheck, FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
 import Buttons from "../../Components/Buttons/Buttons";
 import NavItens from "../../Components/NavItens/NavItens";
+import  useApi from '../../Api/Api'
 import { useUI } from "../../Context/UIContext";
 
 const Servicos = () => {
+  const api =  useApi()
   const { isOpen, openModal, closeModal } = useUI();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const Servicos = () => {
   const fetchServicos = async () => {
     setLoading(true);
     try {
-      const response = await Api.get(`/servico/cliente/${id}`);
+      const response = await api.get(`/servico/cliente/${id}`);
       if (response.status === 200) {
         const fetchedServicos = response.data;
         const servicosArray = Array.isArray(fetchedServicos)
@@ -54,7 +55,7 @@ const Servicos = () => {
   useEffect(() => {
     const fetchServicosCatalogo = async () => {
       try {
-        const response = await Api.get("/servico-catalogo");
+        const response = await api.get("/servico-catalogo");
         if (response.status === 200) {
           setServicosDisponiveis(response.data);
           if (response.data.length > 0) {
@@ -69,7 +70,7 @@ const Servicos = () => {
 
     const fetchClienteNome = async () => {
       try {
-        const response = await Api.get(`/clientes/${id}`);
+        const response = await api.get(`/clientes/${id}`);
         if (response.status === 200) {
           setClienteNome(response.data.nome);
         }
@@ -119,13 +120,13 @@ const Servicos = () => {
     try {
       let response;
       if (isEditing && servicoAtual) {
-        response = await Api.put(
+        response = await api.put(
           `/updateServico/${servicoAtual.id}`,
           serviceData
         );
         toast.success("Serviço atualizado com sucesso!");
       } else {
-        response = await Api.post("/criarServico", serviceData);
+        response = await api.post("/criarServico", serviceData);
         toast.success("Serviço cadastrado com sucesso!");
       }
 
@@ -153,7 +154,7 @@ const Servicos = () => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await Api.delete(`/deletarServico/${id}`);
+      const response = await api.delete(`/deletarServico/${id}`);
       if (response.status === 200) {
         const updatedServicos = servicos.filter((servico) => servico.id !== id);
         toast.success("Serviço deletado com sucesso!");
@@ -184,7 +185,7 @@ const Servicos = () => {
     }
 
     try {
-      const response = await Api.put(`/confirmarServico/${id}`, {
+      const response = await api.put(`/confirmarServico/${id}`, {
         realizado: true,
       });
 
