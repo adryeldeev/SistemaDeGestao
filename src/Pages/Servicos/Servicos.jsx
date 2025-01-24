@@ -15,8 +15,8 @@ import {
 import { FaCheck, FaEdit, FaListUl, FaSearch, FaTrash } from "react-icons/fa";
 import Buttons from "../../Components/Buttons/Buttons";
 import NavItens from "../../Components/NavItens/NavItens";
-import  useApi from '../../Api/Api'
 import { useUI } from "../../Context/UIContext";
+import useApi from "../../Api/Api";
 
 const Servicos = () => {
   const api =  useApi()
@@ -296,7 +296,7 @@ const Servicos = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {servicos.map((servico) => (
+                  {Array.isArray(servicos) && servicos.map((servico) => (
                     <tr
                       key={servico.id}
                       style={{
@@ -371,7 +371,7 @@ const Servicos = () => {
                     required
                   >
                     <option value="">Selecione um serviço</option>
-                    {servicosDisponiveis.map((servico) => (
+                    {Array.isArray(servicosDisponiveis) && servicosDisponiveis.map((servico) => (
                       <option key={servico.id} value={servico.nome}>
                         {servico.nome}
                       </option>
