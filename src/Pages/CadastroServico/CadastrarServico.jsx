@@ -54,13 +54,37 @@ const CadastrarServico = () => {
   
     setIsSubmitting(true); // Define como true antes da requisição
   
+    const nomeServico = nomeServicoRef.current.value.trim();
+    const precoServico = parseFloat(precoServicoRef.current.value);
+  
+    if (!nomeServico || isNaN(precoServico)) {
+      toast.error("Nome e preço do serviço são obrigatórios.");
+      setIsSubmitting(false);
+      return;
+    }
+
+  
+  
+    const servicoExistente = servicos.some(
+      (servico) =>
+        servico.nome.toLowerCase() === nomeServico.toLowerCase() &&
+        (!servicoAtual || servico.id !== servicoAtual.id) 
+    );
+  
+    if (servicoExistente) {
+      toast.error("Já existe um serviço com este nome.");
+      setIsSubmitting(false);
+      return;
+    }
+  
     const servicoAtualizado = {
-      nome: nomeServicoRef.current.value,
-      preco: parseFloat(precoServicoRef.current.value),
+      nome: nomeServico,
+      preco: precoServico,
     };
   
     try {
       if (servicoAtual) {
+        // Atualiza o serviço
         const response = await api.put(
           `/servicoCatalogoUpdate/${servicoAtual.id}`,
           servicoAtualizado
@@ -78,12 +102,13 @@ const CadastrarServico = () => {
           throw new Error("Erro ao atualizar serviço");
         }
       } else {
+        // Adiciona um novo serviço
         const response = await api.post(
           "/criarServico-catalogo",
           servicoAtualizado
         );
   
-        if (response.status === 200) {
+        if (response.status === 201){
           const novoServicoAdicionado = response.data.servicoCatalogo;
           setServicos((prevServicos) => [
             ...prevServicos,
@@ -103,6 +128,7 @@ const CadastrarServico = () => {
       setIsSubmitting(false); // Define como false ao finalizar
     }
   };
+  
 
   const handleDelete = async (id) => {
     try {
