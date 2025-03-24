@@ -88,7 +88,7 @@ const Servicos = () => {
   const calculateTotal = (services) => {
     const totalValue = services.reduce((acc, servico) => {
       const valor = Number(servico.valor) || 0; // Garantir que valor seja um número
-      const quantidade = servico.quantidade || 0; // Garantir que quantidade seja um número
+      const quantidade = Number(servico.quantidade) || 0; // Garantir que quantidade seja um número
       const desconto = Number(servico.desconto) || 0; // Garantir que desconto seja um número
       return acc + valor * quantidade - desconto;
     }, 0);
@@ -122,10 +122,8 @@ const Servicos = () => {
         return;
       }
       const valor = selectedValue !== undefined ? selectedValue : 0;
-      const quantidade = e.target.quantidade.value || 0;
-      const desconto = e.target.desconto.value || 0;
-      
-      
+      const quantidade = Number(e.target.quantidade.value) || 0; // Garantir que seja número
+      const desconto = Number(e.target.desconto.value) || 0; // Garantir que seja número
       
       const serviceData = {
         produtoNome: selectedServiceName,
@@ -137,11 +135,7 @@ const Servicos = () => {
         funcionario: e.target.funcionario.value,
         clienteId: parseInt(id, 10),
       };
-      console.log('selectedValue:', selectedValue);
-      console.log('selectedServiceName:', selectedServiceName);
-      console.log('quantidade:', e.target.quantidade.value);
-      console.log('desconto:', e.target.desconto.value);
-
+      
       let response;
       if (isEditing && servicoAtual) {
         response = await api.put(
