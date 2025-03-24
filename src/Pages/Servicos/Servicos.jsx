@@ -34,6 +34,8 @@ const Servicos = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [servicoAtual, setServicoAtual] = useState(null);
   const [clienteNome, setClienteNome] = useState("");
+  const [quantidade, setQuantidade] = useState(0);
+const [desconto, setDesconto] = useState(0);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -215,6 +217,8 @@ const Servicos = () => {
     setIsEditing(true);
     setSelectedServiceName(servico.produtoNome);
     setSelectedValue(servico.valor);
+    setQuantidade(servico.quantidade); // Garantir que o estado seja atualizado
+    setDesconto(servico.desconto); // Garantir que o estado seja atualizado
     openModal();
   };
 
@@ -391,12 +395,12 @@ const Servicos = () => {
                 <div className="form-group">
                   <label htmlFor="quantidade">Quantidade:</label>
                   <input
-                    type="number"
-                    id="quantidade"
-                    className="form-control"
-                    min="1"
-                    required
-                  />
+  type="number"
+  name="quantidade"
+  value={quantidade}
+  onChange={(e) => setQuantidade(Number(e.target.value))}
+  required
+/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="valor">Valor:</label>
@@ -411,12 +415,12 @@ const Servicos = () => {
                 <div className="form-group">
                   <label htmlFor="desconto">Desconto:</label>
                   <input
-                    type="number"
-                    id="desconto"
-                    className="form-control"
-                    defaultValue="0"
-                    min="0"
-                  />
+  type="number"
+  name="desconto"
+  value={desconto}
+  onChange={(e) => setDesconto(Number(e.target.value))}
+  step="0.01"
+/>
                 </div>
                 <div className="form-group">
                   <label htmlFor="funcionario">Funcionário:</label>
