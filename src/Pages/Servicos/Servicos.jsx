@@ -62,7 +62,7 @@ const Servicos = () => {
           );
           if (catalogoResponse.data.length > 0) {
             setSelectedServiceName("");
-            setSelectedValue(catalogoResponse.data[0].preco);
+            setSelectedValue(catalogoResponse.data[0].preco || 0)
           }
         }
 
@@ -100,7 +100,10 @@ const Servicos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (selectedValue === undefined || selectedServiceName === "" || clienteNome === undefined) {
+      alert("Os dados necessários não foram carregados corretamente.");
+      return;
+    }
     if (submitting) return;
     setSubmitting(true);
 
@@ -112,17 +115,22 @@ const Servicos = () => {
         toast.error("Selecione um serviço válido.");
         return;
       }
+      const valor = selectedValue !== undefined ? selectedValue : 0;
+      const quantidade = e.target.quantidade.value || 0;
+      const desconto = e.target.desconto.value || 0;
+    
 
-      const serviceData = {
-        produtoNome: service.nome,
-        realizadoEm: e.target.data.value,
-        horario: e.target.horario.value,
-        quantidade: parseInt(e.target.quantidade.value, 10) || 0, // Garantir que quantidade seja número
-        valor: parseFloat(selectedValue) || 0, // Verifica se selectedValue é válido
-        desconto: parseFloat(e.target.desconto.value || 0), // Garantir que desconto seja número
-        funcionario: e.target.funcionario.value,
-        clienteId: parseInt(id, 10),
-      };
+     
+  const serviceData = {
+    produtoNome: selectedServiceName,
+    realizadoEm: e.target.data.value,
+    horario: e.target.horario.value,
+    quantidade,
+    valor,
+    desconto,
+    funcionario: e.target.funcionario.value,
+    clienteId: parseInt(id, 10),
+  };
 
       let response;
       if (isEditing && servicoAtual) {
@@ -222,7 +230,9 @@ const Servicos = () => {
   ];
 
   if (loading) return <p>Carregando...</p>;
-
+  if (!servicos || !servicosDisponiveis || clienteNome === undefined) {
+    return <div>Carregando dados necessários...</div>;
+  }
   return (
     <Fragment>
       <ToastContainer />
