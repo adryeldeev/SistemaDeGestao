@@ -75,7 +75,7 @@ const Servicos = () => {
 
   const calculateTotal = (services) => {
     const totalValue = services.reduce(
-      (acc, servico) => acc + servico.valor * servico.quantidade - servico.desconto,
+      (acc, servico) => acc + (Number(servico.valor) || 0) * (servico.quantidade || 0) - (Number(servico.desconto) || 0),
       0
     );
     setTotal(totalValue);
@@ -252,7 +252,7 @@ const Servicos = () => {
                     <tr key={servico.id} style={{ backgroundColor: servico.realizado ? "#ccc" : "inherit" }}>
                       <td>{servico.id}</td>
                       <td>{servico.produtoNome}</td>
-                      <td>{new Date(servico.realizadoEm).toLocaleDateString()}</td>
+                      <td>{servico.realizadoEm ? new Date(servico.realizadoEm).toLocaleDateString() : "Data inválida"}</td>
                       <td>{servico.horario}</td>
                       <td>{servico.quantidade}</td>
                       <td>{servico.valor ? servico.valor.toFixed(2) : "0.00"}</td>
