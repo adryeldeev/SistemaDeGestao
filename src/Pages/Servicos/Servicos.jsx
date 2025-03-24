@@ -106,7 +106,7 @@ const Servicos = () => {
         realizadoEm: e.target.data.value,
         horario: e.target.horario.value,
         quantidade: parseInt(e.target.quantidade.value, 10),
-        valor: parseFloat(selectedValue),
+        valor: parseFloat(selectedValue) || 0, // Verifica se selectedValue é válido
         desconto: parseFloat(e.target.desconto.value || 0),
         funcionario: e.target.funcionario.value,
         clienteId: parseInt(id, 10),
