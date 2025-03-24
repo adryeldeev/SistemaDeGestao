@@ -45,9 +45,7 @@ const Servicos = () => {
             api.get("/servico-catalogo"),
             api.get(`/clientes/${id}`),
           ]);
-          console.log('servicosResponse:', servicosResponse);
-      console.log('catalogoResponse:', catalogoResponse);
-      console.log('clienteResponse:', clienteResponse)
+          
 
         if (servicosResponse.status === 200) {
           const fetchedServicos = Array.isArray(servicosResponse.data)
@@ -58,14 +56,19 @@ const Servicos = () => {
         }
 
         if (catalogoResponse.status === 200) {
-          setServicosDisponiveis(
-            Array.isArray(catalogoResponse.data.data)
-              ? catalogoResponse.data.data
-              : []
-          );
-          if (catalogoResponse.data.length > 0) {
+          console.log('catalogoResponse:', catalogoResponse);
+          
+          // Verificando se o campo `data` dentro de `catalogoResponse` existe e está bem estruturado
+          const catalogoData = catalogoResponse.data && catalogoResponse.data.data;
+          if (Array.isArray(catalogoData)) {
+            setServicosDisponiveis(catalogoData);
+          } else {
+            console.error('Erro: `data` ou `data.data` não está bem estruturado.');
+          }
+        
+          if (catalogoData && catalogoData.length > 0) {
             setSelectedServiceName("");
-            setSelectedValue(catalogoResponse.data[0].preco || 0)
+            setSelectedValue(catalogoData[0].preco);
           }
         }
 
