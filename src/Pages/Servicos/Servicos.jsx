@@ -111,6 +111,7 @@ const Servicos = () => {
         funcionario: e.target.funcionario.value,
         clienteId: parseInt(id, 10),
       };
+      console.log('Dados enviado :', serviceData)
 
       let response;
       if (isEditing && servicoAtual) {
@@ -118,11 +119,16 @@ const Servicos = () => {
         toast.success("Serviço atualizado com sucesso!");
       } else {
         response = await api.post("/criarServico", serviceData);
-        toast.success("Serviço cadastrado com sucesso!");
+      
+          toast.success("Serviço cadastrado com sucesso!");
+        
       }
 
       if (response.status === (isEditing ? 200 : 201)) {
         const updatedService = response.data;
+        if (!updatedService) {
+          throw new Error("Dados inválidos recebidos do servidor.");
+        }
         setServicos((prev) => {
           const updatedServicos = isEditing
             ? prev.map((s) => (s.id === updatedService.id ? updatedService : s))
@@ -131,14 +137,16 @@ const Servicos = () => {
           return updatedServicos;
         });
         closeModalAndReset();
+      } else {
+        throw new Error(`Erro inesperado do servidor. Status: ${response.status}`);
       }
     } catch (error) {
       toast.error("Erro ao salvar serviço.");
       console.error(error);
     } finally {
       setSubmitting(false);
-    }
-  };
+  }
+};
 
   const handleDelete = async (id) => {
     try {
@@ -249,7 +257,7 @@ const Servicos = () => {
                       <td>{servico.horario}</td>
                       <td>{servico.quantidade}</td>
                       <td>{servico.valor.toFixed(2)}</td>
-                      <td>{servico.desconto.toFixed(2)}</td>
+                      <td>{servico.desconto ? Number(servico.desconto).toFixed(2) : "0.00"}</td>
                       <td>{(servico.valor * servico.quantidade - servico.desconto).toFixed(2)}</td>
                       <td>{servico.funcionario}</td>
                       <td>
