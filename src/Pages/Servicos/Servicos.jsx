@@ -45,7 +45,6 @@ const Servicos = () => {
             api.get("/servico-catalogo"),
             api.get(`/clientes/${id}`),
           ]);
-          
 
         if (servicosResponse.status === 200) {
           const fetchedServicos = Array.isArray(servicosResponse.data)
@@ -56,16 +55,19 @@ const Servicos = () => {
         }
 
         if (catalogoResponse.status === 200) {
-          console.log('catalogoResponse:', catalogoResponse);
-          
+          console.log("catalogoResponse:", catalogoResponse);
+
           // Verificando se o campo `data` dentro de `catalogoResponse` existe e está bem estruturado
-          const catalogoData = catalogoResponse.data && catalogoResponse.data.data;
+          const catalogoData =
+            catalogoResponse.data && catalogoResponse.data.data;
           if (Array.isArray(catalogoData)) {
             setServicosDisponiveis(catalogoData);
           } else {
-            console.error('Erro: `data` ou `data.data` não está bem estruturado.');
+            console.error(
+              "Erro: `data` ou `data.data` não está bem estruturado."
+            );
           }
-        
+
           if (catalogoData && catalogoData.length > 0) {
             setSelectedServiceName("");
             setSelectedValue(catalogoData[0].preco);
@@ -87,9 +89,9 @@ const Servicos = () => {
 
   const calculateTotal = (services) => {
     const totalValue = services.reduce((acc, servico) => {
-      const valor = Number(servico.valor) || 0; // Garantir que valor seja um número
-      const quantidade = Number(servico.quantidade) || 0; // Garantir que quantidade seja um número
-      const desconto = Number(servico.desconto) || 0; // Garantir que desconto seja um número
+      const valor = parseFloat(servico.valor) || 0; 
+      const quantidade = parseInt(servico.quantidade, 10) || 0; 
+      const desconto = parseFloat(servico.desconto) || 0; 
       return acc + valor * quantidade - desconto;
     }, 0);
     setTotal(totalValue);
@@ -106,13 +108,17 @@ const Servicos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (selectedValue === undefined || selectedServiceName === "" || clienteNome === undefined) {
+    if (
+      selectedValue === undefined ||
+      selectedServiceName === "" ||
+      clienteNome === undefined
+    ) {
       alert("Os dados necessários não foram carregados corretamente.");
       return;
     }
     if (submitting) return;
     setSubmitting(true);
-    
+
     try {
       const service = servicosDisponiveis.find(
         (s) => s.nome === selectedServiceName
@@ -121,10 +127,10 @@ const Servicos = () => {
         toast.error("Selecione um serviço válido.");
         return;
       }
-      const valor = selectedValue !== undefined ? selectedValue : 0;
-      const quantidade = Number(e.target.quantidade.value) || 0; // Garantir que seja número
-      const desconto = Number(e.target.desconto.value) || 0; // Garantir que seja número
-      
+      const valor = parseFloat(selectedValue) || 0;
+      const quantidade = parseInt(e.target.quantidade.value, 10) || 0; // Garante que seja um número inteiro
+      const desconto = parseFloat(e.target.desconto.value) || 0; // Garantir que seja número
+
       const serviceData = {
         produtoNome: selectedServiceName,
         realizadoEm: e.target.data.value,
@@ -135,7 +141,7 @@ const Servicos = () => {
         funcionario: e.target.funcionario.value,
         clienteId: parseInt(id, 10),
       };
-      
+
       let response;
       if (isEditing && servicoAtual) {
         response = await api.put(
