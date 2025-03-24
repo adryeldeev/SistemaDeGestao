@@ -45,6 +45,9 @@ const Servicos = () => {
             api.get("/servico-catalogo"),
             api.get(`/clientes/${id}`),
           ]);
+          console.log('servicosResponse:', servicosResponse);
+      console.log('catalogoResponse:', catalogoResponse);
+      console.log('clienteResponse:', clienteResponse)
 
         if (servicosResponse.status === 200) {
           const fetchedServicos = Array.isArray(servicosResponse.data)
@@ -106,7 +109,7 @@ const Servicos = () => {
     }
     if (submitting) return;
     setSubmitting(true);
-
+    
     try {
       const service = servicosDisponiveis.find(
         (s) => s.nome === selectedServiceName
@@ -118,19 +121,23 @@ const Servicos = () => {
       const valor = selectedValue !== undefined ? selectedValue : 0;
       const quantidade = e.target.quantidade.value || 0;
       const desconto = e.target.desconto.value || 0;
-    
-
-     
-  const serviceData = {
-    produtoNome: selectedServiceName,
-    realizadoEm: e.target.data.value,
-    horario: e.target.horario.value,
-    quantidade,
-    valor,
-    desconto,
-    funcionario: e.target.funcionario.value,
-    clienteId: parseInt(id, 10),
-  };
+      
+      
+      
+      const serviceData = {
+        produtoNome: selectedServiceName,
+        realizadoEm: e.target.data.value,
+        horario: e.target.horario.value,
+        quantidade,
+        valor,
+        desconto,
+        funcionario: e.target.funcionario.value,
+        clienteId: parseInt(id, 10),
+      };
+      console.log('selectedValue:', selectedValue);
+      console.log('selectedServiceName:', selectedServiceName);
+      console.log('quantidade:', e.target.quantidade.value);
+      console.log('desconto:', e.target.desconto.value);
 
       let response;
       if (isEditing && servicoAtual) {
