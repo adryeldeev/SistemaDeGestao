@@ -143,6 +143,7 @@ const [desconto, setDesconto] = useState(0);
         funcionario: e.target.funcionario.value,
         clienteId: Number(id), // Cliente ID também deve ser número
       };
+      console.log('Dados enviado : ', serviceData)
 
       let response;
       if (isEditing && servicoAtual) {
