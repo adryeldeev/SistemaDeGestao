@@ -44,7 +44,7 @@ const Servicos = () => {
           api.get("/servico-catalogo"),
           api.get(`/clientes/${id}`),
         ]);
-
+        
         if (servicosResponse.status === 200) {
           const fetchedServicos = Array.isArray(servicosResponse.data) ? servicosResponse.data : [];
           setServicos(fetchedServicos);
@@ -52,7 +52,8 @@ const Servicos = () => {
         }
 
         if (catalogoResponse.status === 200) {
-          setServicosDisponiveis(Array.isArray(catalogoResponse.data) ? catalogoResponse.data : []);
+         
+          setServicosDisponiveis(Array.isArray(catalogoResponse.data.data) ? catalogoResponse.data.data : []);
           if (catalogoResponse.data.length > 0) {
             setSelectedServiceName("");
             setSelectedValue(catalogoResponse.data[0].preco);
