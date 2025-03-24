@@ -35,7 +35,7 @@ const Servicos = () => {
   const [servicoAtual, setServicoAtual] = useState(null);
   const [clienteNome, setClienteNome] = useState("");
   const [quantidade, setQuantidade] = useState(0);
-const [desconto, setDesconto] = useState(0);
+  const [desconto, setDesconto] = useState(0);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -91,9 +91,9 @@ const [desconto, setDesconto] = useState(0);
 
   const calculateTotal = (services) => {
     const totalValue = services.reduce((acc, servico) => {
-      const valor = parseFloat(servico.valor) || 0; 
-      const quantidade = parseInt(servico.quantidade, 10) || 0; 
-      const desconto = parseFloat(servico.desconto) || 0; 
+      const valor = parseFloat(servico.valor) || 0;
+      const quantidade = parseInt(servico.quantidade, 10) || 0;
+      const desconto = parseFloat(servico.desconto) || 0;
       return acc + valor * quantidade - desconto;
     }, 0);
     setTotal(totalValue);
@@ -130,8 +130,8 @@ const [desconto, setDesconto] = useState(0);
         return;
       }
       const valor = parseFloat(selectedValue) || 0;
-      const quantidade = parseInt(e.target.quantidade.value, 10) || 0; // Garante que seja um número inteiro
-      const desconto = parseFloat(e.target.desconto.value) || 0; // Garantir que seja número
+      const quantidade = Number(e.target.quantidade.value) || 0; // Garante que seja um número
+      const desconto = Number(e.target.desconto.value) || 0; // Garantir que seja número
 
       const serviceData = {
         produtoNome: selectedServiceName,
@@ -143,7 +143,7 @@ const [desconto, setDesconto] = useState(0);
         funcionario: e.target.funcionario.value,
         clienteId: Number(id), // Cliente ID também deve ser número
       };
-      console.log('Dados enviado : ', serviceData)
+      console.log("Dados enviado : ", serviceData);
 
       let response;
       if (isEditing && servicoAtual) {
@@ -396,12 +396,12 @@ const [desconto, setDesconto] = useState(0);
                 <div className="form-group">
                   <label htmlFor="quantidade">Quantidade:</label>
                   <input
-  type="number"
-  name="quantidade"
-  value={quantidade}
-  onChange={(e) => setQuantidade(Number(e.target.value))}
-  required
-/>
+                    type="number"
+                    name="quantidade"
+                    value={quantidade}
+                    onChange={(e) => setQuantidade(Number(e.target.value) || 0)} 
+                    required
+                  />
                 </div>
                 <div className="form-group">
                   <label htmlFor="valor">Valor:</label>
@@ -416,12 +416,12 @@ const [desconto, setDesconto] = useState(0);
                 <div className="form-group">
                   <label htmlFor="desconto">Desconto:</label>
                   <input
-  type="number"
-  name="desconto"
-  value={desconto}
-  onChange={(e) => setDesconto(Number(e.target.value))}
-  step="0.01"
-/>
+                    type="number"
+                    name="desconto"
+                    value={desconto}
+                    onChange={(e) => setDesconto(Number(e.target.value) || 0)}
+                    step="0.01"
+                  />
                 </div>
                 <div className="form-group">
                   <label htmlFor="funcionario">Funcionário:</label>
