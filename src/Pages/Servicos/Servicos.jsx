@@ -90,17 +90,17 @@ const Servicos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (submitting) return;
     setSubmitting(true);
-
+  
     try {
       const service = servicosDisponiveis.find((s) => s.nome === selectedServiceName);
       if (!service) {
         toast.error("Selecione um serviço válido.");
         return;
       }
-
+  
       const serviceData = {
         produtoNome: service.nome,
         realizadoEm: e.target.data.value,
@@ -111,30 +111,35 @@ const Servicos = () => {
         funcionario: e.target.funcionario.value,
         clienteId: parseInt(id, 10),
       };
-      
+  
       let response;
       if (isEditing && servicoAtual) {
         response = await api.put(`/updateServico/${servicoAtual.id}`, serviceData);
         toast.success("Serviço atualizado com sucesso!");
       } else {
         response = await api.post("/criarServico", serviceData);
-      
-          toast.success("Serviço cadastrado com sucesso!");
-        
+        toast.success("Serviço cadastrado com sucesso!");
       }
-
+  
       if (response.status === (isEditing ? 200 : 201)) {
         const updatedService = response.data;
         if (!updatedService) {
           throw new Error("Dados inválidos recebidos do servidor.");
         }
+  
+        // Verifique se o valor de `valor` e `desconto` são números válidos
+        const validValue = !isNaN(updatedService.valor) ? updatedService.valor : 0;
+        const validDiscount = !isNaN(updatedService.desconto) ? updatedService.desconto : 0;
+  
         setServicos((prev) => {
           const updatedServicos = isEditing
-            ? prev.map((s) => (s.id === updatedService.id ? updatedService : s))
-            : [...prev, updatedService];
+            ? prev.map((s) => (s.id === updatedService.id ? { ...updatedService, valor: validValue, desconto: validDiscount } : s))
+            : [...prev, { ...updatedService, valor: validValue, desconto: validDiscount }];
+          
           calculateTotal(updatedServicos);
           return updatedServicos;
         });
+        
         closeModalAndReset();
       } else {
         throw new Error(`Erro inesperado do servidor. Status: ${response.status}`);
@@ -144,8 +149,8 @@ const Servicos = () => {
       console.error(error);
     } finally {
       setSubmitting(false);
-  }
-};
+    }
+  };
 
   const handleDelete = async (id) => {
     try {
