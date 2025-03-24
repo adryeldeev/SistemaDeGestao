@@ -274,7 +274,7 @@ const Servicos = () => {
                   ))}
                 </tbody>
               </table>
-              <p>Total: R${total.toFixed(2)}</p>
+              <p>Total: R${total ? total.toFixed(2) : "0.00"}</p>
             </TableServico>
           ) : (
             <p>Nenhum serviço cadastrado para este cliente.</p>
