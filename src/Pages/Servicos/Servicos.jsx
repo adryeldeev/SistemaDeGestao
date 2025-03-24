@@ -135,11 +135,11 @@ const Servicos = () => {
         produtoNome: selectedServiceName,
         realizadoEm: e.target.data.value,
         horario: e.target.horario.value,
-        quantidade,
-        valor,
-        desconto,
+        quantidade: Number(quantidade), // Garante que é um número
+        valor: Number(valor), // Garante que é um número
+        desconto: Number(desconto), // Garante que é um número
         funcionario: e.target.funcionario.value,
-        clienteId: parseInt(id, 10),
+        clienteId: Number(id), // Cliente ID também deve ser número
       };
 
       let response;
