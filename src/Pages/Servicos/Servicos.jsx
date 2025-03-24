@@ -111,8 +111,7 @@ const Servicos = () => {
         funcionario: e.target.funcionario.value,
         clienteId: parseInt(id, 10),
       };
-      console.log('Dados enviado :', serviceData)
-
+      
       let response;
       if (isEditing && servicoAtual) {
         response = await api.put(`/updateServico/${servicoAtual.id}`, serviceData);
@@ -208,7 +207,7 @@ const Servicos = () => {
       onClick: () => navigate(`/buscarservicodocliente/${id}`),
     },
   ];
-
+  
   if (loading) return <p>Carregando...</p>;
 
   return (
@@ -256,7 +255,7 @@ const Servicos = () => {
                       <td>{new Date(servico.realizadoEm).toLocaleDateString()}</td>
                       <td>{servico.horario}</td>
                       <td>{servico.quantidade}</td>
-                      <td>{servico.valor.toFixed(2)}</td>
+                      <td>{servico.valor ? servico.valor.toFixed(2) : "0.00"}</td>
                       <td>{servico.desconto ? Number(servico.desconto).toFixed(2) : "0.00"}</td>
                       <td>{(servico.valor * servico.quantidade - servico.desconto).toFixed(2)}</td>
                       <td>{servico.funcionario}</td>
