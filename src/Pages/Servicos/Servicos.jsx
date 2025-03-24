@@ -74,10 +74,12 @@ const Servicos = () => {
   }, [id]);
 
   const calculateTotal = (services) => {
-    const totalValue = services.reduce(
-      (acc, servico) => acc + (Number(servico.valor) || 0) * (servico.quantidade || 0) - (Number(servico.desconto) || 0),
-      0
-    );
+    const totalValue = services.reduce((acc, servico) => {
+      const valor = Number(servico.valor) || 0; // Garantir que valor seja um número
+      const quantidade = servico.quantidade || 0; // Garantir que quantidade seja um número
+      const desconto = Number(servico.desconto) || 0; // Garantir que desconto seja um número
+      return acc + (valor * quantidade) - desconto;
+    }, 0);
     setTotal(totalValue);
   };
 
@@ -105,9 +107,9 @@ const Servicos = () => {
         produtoNome: service.nome,
         realizadoEm: e.target.data.value,
         horario: e.target.horario.value,
-        quantidade: parseInt(e.target.quantidade.value, 10),
+        quantidade: parseInt(e.target.quantidade.value, 10) || 0, // Garantir que quantidade seja número
         valor: parseFloat(selectedValue) || 0, // Verifica se selectedValue é válido
-        desconto: parseFloat(e.target.desconto.value || 0),
+        desconto: parseFloat(e.target.desconto.value || 0), // Garantir que desconto seja número
         funcionario: e.target.funcionario.value,
         clienteId: parseInt(id, 10),
       };
