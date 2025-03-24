@@ -120,38 +120,29 @@ const Servicos = () => {
         response = await api.post("/criarServico", serviceData);
         toast.success("Serviço cadastrado com sucesso!");
       }
-  
       if (response.status === (isEditing ? 200 : 201)) {
         const updatedService = response.data;
-        if (!updatedService) {
-          throw new Error("Dados inválidos recebidos do servidor.");
-        }
-  
-        // Verifique se o valor de `valor` e `desconto` são números válidos
-        const validValue = !isNaN(updatedService.valor) ? updatedService.valor : 0;
-        const validDiscount = !isNaN(updatedService.desconto) ? updatedService.desconto : 0;
-  
-        setServicos((prev) => {
+        setServicos((prevServicos) => {
           const updatedServicos = isEditing
-            ? prev.map((s) => (s.id === updatedService.id ? { ...updatedService, valor: validValue, desconto: validDiscount } : s))
-            : [...prev, { ...updatedService, valor: validValue, desconto: validDiscount }];
-          
-          calculateTotal(updatedServicos);
+            ? prevServicos.map((servico) =>
+                servico.id === updatedService.id ? updatedService : servico
+              )
+            : [...prevServicos, updatedService]; // Adiciona o serviço se não for edição
+          calculateTotal(updatedServicos); // Atualiza o total após modificação
           return updatedServicos;
         });
-        
         closeModalAndReset();
       } else {
-        throw new Error(`Erro inesperado do servidor. Status: ${response.status}`);
+        console.log("Erro ao salvar serviço");
       }
     } catch (error) {
+      console.log("Erro ao enviar dados para API:", error);
       toast.error("Erro ao salvar serviço.");
       console.error(error);
     } finally {
       setSubmitting(false);
     }
-  };
-
+  }
   const handleDelete = async (id) => {
     try {
       const response = await api.delete(`/deletarServico/${id}`);
@@ -165,7 +156,9 @@ const Servicos = () => {
       toast.error("Erro ao excluir serviço.");
       console.error(error);
     }
-  };
+  }
+
+  ;
 
   const handleConfirm = async (id) => {
     try {
