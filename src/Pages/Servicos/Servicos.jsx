@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useReducer, useEffect, Fragment } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,28 +18,77 @@ import NavItens from "../../Components/NavItens/NavItens";
 import { useUI } from "../../Context/UIContext";
 import useApi from "../../Api/Api";
 
+// Initial state for useReducer
+const initialState = {
+  loading: true,
+  servicos: [],
+  servicosDisponiveis: [],
+  selectedServiceName: "",
+  selectedValue: 0,
+  total: 0,
+  submitting: false,
+  isEditing: false,
+  servicoAtual: null,
+  clienteNome: "",
+  quantidade: 0,
+  desconto: 0,
+};
+
+// Reducer function
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+    case "SET_SERVICOS":
+      return { ...state, servicos: action.payload };
+    case "SET_SERVICOS_DISPONIVEIS":
+      return { ...state, servicosDisponiveis: action.payload };
+    case "SET_SELECTED_SERVICE":
+      return {
+        ...state,
+        selectedServiceName: action.payload.name,
+        selectedValue: action.payload.value,
+      };
+    case "SET_CLIENTE_NOME":
+      return { ...state, clienteNome: action.payload };
+    case "SET_TOTAL":
+      return { ...state, total: action.payload };
+    case "SET_SUBMITTING":
+      return { ...state, submitting: action.payload };
+    case "SET_EDITING":
+      return {
+        ...state,
+        isEditing: action.payload.isEditing,
+        servicoAtual: action.payload.servicoAtual,
+      };
+    case "RESET_FORM":
+      return {
+        ...state,
+        selectedServiceName: "",
+        selectedValue: 0,
+        quantidade: 0,
+        desconto: 0,
+        isEditing: false,
+        servicoAtual: null,
+      };
+    case "UPDATE_FIELD":
+      return { ...state, [action.field]: action.value };
+    default:
+      return state;
+  }
+};
+
 const Servicos = () => {
   const api = useApi();
   const { isOpen, openModal, closeModal } = useUI();
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
-  const [servicos, setServicos] = useState([]);
-  const [servicosDisponiveis, setServicosDisponiveis] = useState([]);
-  const [selectedServiceName, setSelectedServiceName] = useState("");
-  const [selectedValue, setSelectedValue] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [servicoAtual, setServicoAtual] = useState(null);
-  const [clienteNome, setClienteNome] = useState("");
-  const [quantidade, setQuantidade] = useState(0);
-  const [desconto, setDesconto] = useState(0);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      setLoading(true);
+      dispatch({ type: "SET_LOADING", payload: true });
       try {
         const [servicosResponse, catalogoResponse, clienteResponse] =
           await Promise.all([
@@ -52,37 +101,25 @@ const Servicos = () => {
           const fetchedServicos = Array.isArray(servicosResponse.data)
             ? servicosResponse.data
             : [];
-          setServicos(fetchedServicos);
+          dispatch({ type: "SET_SERVICOS", payload: fetchedServicos });
           calculateTotal(fetchedServicos);
         }
 
         if (catalogoResponse.status === 200) {
-          console.log("catalogoResponse:", catalogoResponse);
-
-          // Verificando se o campo `data` dentro de `catalogoResponse` existe e está bem estruturado
           const catalogoData =
             catalogoResponse.data && catalogoResponse.data.data;
           if (Array.isArray(catalogoData)) {
-            setServicosDisponiveis(catalogoData);
-          } else {
-            console.error(
-              "Erro: `data` ou `data.data` não está bem estruturado."
-            );
-          }
-
-          if (catalogoData && catalogoData.length > 0) {
-            setSelectedServiceName("");
-            setSelectedValue(catalogoData[0].preco);
+            dispatch({ type: "SET_SERVICOS_DISPONIVEIS", payload: catalogoData });
           }
         }
 
         if (clienteResponse.status === 200) {
-          setClienteNome(clienteResponse.data.nome);
+          dispatch({ type: "SET_CLIENTE_NOME", payload: clienteResponse.data.nome });
         }
       } catch (error) {
         console.error("Erro ao buscar dados iniciais:", error);
       } finally {
-        setLoading(false);
+        dispatch({ type: "SET_LOADING", payload: false });
       }
     };
 
@@ -96,59 +133,58 @@ const Servicos = () => {
       const desconto = parseFloat(servico.desconto) || 0;
       return acc + valor * quantidade - desconto;
     }, 0);
-    setTotal(totalValue);
+    dispatch({ type: "SET_TOTAL", payload: totalValue });
   };
 
   const handleServiceChange = (e) => {
     const selectedName = e.target.value;
-    const service = servicosDisponiveis.find(
+    const service = state.servicosDisponiveis.find(
       (servico) => servico.nome === selectedName
     );
-    setSelectedServiceName(selectedName);
-    setSelectedValue(service ? service.preco : 0);
+    dispatch({
+      type: "SET_SELECTED_SERVICE",
+      payload: { name: selectedName, value: service ? service.preco : 0 },
+    });
   };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (
-      selectedValue === undefined ||
-      selectedServiceName === "" ||
-      clienteNome === undefined
+      state.selectedValue === undefined ||
+      state.selectedServiceName === "" ||
+      state.clienteNome === undefined
     ) {
       alert("Os dados necessários não foram carregados corretamente.");
       return;
     }
-    if (submitting) return;
-    setSubmitting(true);
+    if (state.submitting) return;
+    dispatch({ type: "SET_SUBMITTING", payload: true });
 
     try {
-      const service = servicosDisponiveis.find(
-        (s) => s.nome === selectedServiceName
+      const service = state.servicosDisponiveis.find(
+        (s) => s.nome === state.selectedServiceName
       );
       if (!service) {
         toast.error("Selecione um serviço válido.");
         return;
       }
-      const valor = parseFloat(selectedValue) || 0;
-      const quantidade = Number(e.target.quantidade.value) || 0; // Garante que seja um número
-      const desconto = Number(e.target.desconto.value) || 0; // Garantir que seja número
-
       const serviceData = {
-        produtoNome: selectedServiceName,
+        produtoNome: state.selectedServiceName,
         realizadoEm: e.target.data.value,
         horario: e.target.horario.value,
-        quantidade: Number(quantidade), // Garante que é um número
-        valor: Number(valor), // Garante que é um número
-        desconto: Number(desconto), // Garante que é um número
+        quantidade: state.quantidade,
+        valor: state.selectedValue,
+        desconto: state.desconto,
         funcionario: e.target.funcionario.value,
-        clienteId: Number(id), // Cliente ID também deve ser número
+        clienteId: Number(id),
       };
-      console.log("Dados enviado : ", serviceData);
 
       let response;
-      if (isEditing && servicoAtual) {
+      if (state.isEditing && state.servicoAtual) {
         response = await api.put(
-          `/updateServico/${servicoAtual.id}`,
+          `/updateServico/${state.servicoAtual.id}`,
           serviceData
         );
         toast.success("Serviço atualizado com sucesso!");
@@ -156,103 +192,42 @@ const Servicos = () => {
         response = await api.post("/criarServico", serviceData);
         toast.success("Serviço cadastrado com sucesso!");
       }
-      if (response.status === (isEditing ? 200 : 201)) {
+      if (response.status === (state.isEditing ? 200 : 201)) {
         const updatedService = response.data;
-        setServicos((prevServicos) => {
-          const updatedServicos = isEditing
-            ? prevServicos.map((servico) =>
+        dispatch({
+          type: "SET_SERVICOS",
+          payload: state.isEditing
+            ? state.servicos.map((servico) =>
                 servico.id === updatedService.id ? updatedService : servico
               )
-            : [...prevServicos, updatedService]; // Adiciona o serviço se não for edição
-          calculateTotal(updatedServicos); // Atualiza o total após modificação
-          return updatedServicos;
+            : [...state.servicos, updatedService],
         });
+        calculateTotal(state.servicos);
         closeModalAndReset();
-      } else {
-        console.log("Erro ao salvar serviço");
       }
     } catch (error) {
-      console.log("Erro ao enviar dados para API:", error);
+      console.error("Erro ao enviar dados para API:", error);
       toast.error("Erro ao salvar serviço.");
-      console.error(error);
     } finally {
-      setSubmitting(false);
+      dispatch({ type: "SET_SUBMITTING", payload: false });
     }
-  };
-  const handleDelete = async (id) => {
-    try {
-      const response = await api.delete(`/deletarServico/${id}`);
-      if (response.status === 200) {
-        const updatedServicos = servicos.filter((servico) => servico.id !== id);
-        setServicos(updatedServicos);
-        calculateTotal(updatedServicos);
-        toast.success("Serviço deletado com sucesso!");
-      }
-    } catch (error) {
-      toast.error("Erro ao excluir serviço.");
-      console.error(error);
-    }
-  };
-
-  const handleConfirm = async (id) => {
-    try {
-      const response = await api.put(`/confirmarServico/${id}`, {
-        realizado: true,
-      });
-      if (response.status === 200) {
-        setServicos((prev) =>
-          prev.map((servico) =>
-            servico.id === id ? { ...servico, realizado: true } : servico
-          )
-        );
-        toast.success("Serviço confirmado com sucesso!");
-      }
-    } catch (error) {
-      toast.error("Erro ao confirmar serviço.");
-      console.error(error);
-    }
-  };
-
-  const handleEdit = (servico) => {
-    setServicoAtual(servico);
-    setIsEditing(true);
-    setSelectedServiceName(servico.produtoNome);
-    setSelectedValue(servico.valor);
-    setQuantidade(servico.quantidade); // Garantir que o estado seja atualizado
-    setDesconto(servico.desconto); // Garantir que o estado seja atualizado
-    openModal();
   };
 
   const closeModalAndReset = () => {
-    setServicoAtual(null);
-    setIsEditing(false);
-    setSelectedServiceName("");
-    setSelectedValue(0);
+    dispatch({ type: "RESET_FORM" });
     closeModal();
   };
 
-  const buttons = [
-    {
-      label: "Lista de serviço do cliente",
-      icon: FaListUl,
-      onClick: () => navigate(`/servicos/${id}`),
-    },
-    {
-      label: "Buscar serviço do cliente",
-      icon: FaSearch,
-      onClick: () => navigate(`/buscarservicodocliente/${id}`),
-    },
-  ];
-
-  if (loading) return <p>Carregando...</p>;
-  if (!servicos || !servicosDisponiveis || clienteNome === undefined) {
+  if (state.loading) return <p>Carregando...</p>;
+  if (!state.servicos || !state.servicosDisponiveis || state.clienteNome === undefined) {
     return <div>Carregando dados necessários...</div>;
   }
+
   return (
     <Fragment>
       <ToastContainer />
       <NavItens />
-      <h1>Serviços do Cliente {clienteNome}</h1>
+      <h1>Serviços do Cliente {state.clienteNome}</h1>
       <DivServicos>
         <OptionsServicos>
           <InfoServico>
@@ -264,13 +239,26 @@ const Servicos = () => {
               Lorem ipsum dolor sit, amet consectetur adipisicing elit.
             </span>
           </InfoServico>
-          <Buttons buttons={buttons} />
+          <Buttons
+            buttons={[
+              {
+                label: "Lista de serviço do cliente",
+                icon: FaListUl,
+                onClick: () => navigate(`/servicos/${id}`),
+              },
+              {
+                label: "Buscar serviço do cliente",
+                icon: FaSearch,
+                onClick: () => navigate(`/buscarservicodocliente/${id}`),
+              },
+            ]}
+          />
           <ButtonServico>
             <button className="btn btn-primary" onClick={openModal}>
               + Adicionar
             </button>
           </ButtonServico>
-          {servicos.length > 0 ? (
+          {state.servicos.length > 0 ? (
             <TableServico>
               <table className="table">
                 <thead>
@@ -288,66 +276,25 @@ const Servicos = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {servicos.map((servico) => (
-                    <tr
-                      key={servico.id}
-                      style={{
-                        backgroundColor: servico.realizado ? "#ccc" : "inherit",
-                      }}
-                    >
+                  {state.servicos.map((servico) => (
+                    <tr key={servico.id}>
                       <td>{servico.id}</td>
                       <td>{servico.produtoNome}</td>
-                      <td>
-                        {servico.realizadoEm &&
-                        !isNaN(new Date(servico.realizadoEm).getTime())
-                          ? new Date(servico.realizadoEm).toLocaleDateString()
-                          : "Data inválida"}
-                      </td>
+                      <td>{servico.realizadoEm}</td>
                       <td>{servico.horario}</td>
-                      <td>{servico.quantidade || 0}</td>
-                      <td>
-                        {servico.valor ? servico.valor.toFixed(2) : "0.00"}
-                      </td>
-                      <td>
-                        {servico.desconto
-                          ? Number(servico.desconto).toFixed(2)
-                          : "0.00"}
-                      </td>
-                      <td>
-                        {(
-                          (servico.valor || 0) * (servico.quantidade || 0) -
-                          (servico.desconto || 0)
-                        ).toFixed(2)}
-                      </td>
+                      <td>{servico.quantidade}</td>
+                      <td>{servico.valor}</td>
+                      <td>{servico.desconto}</td>
+                      <td>{servico.total}</td>
                       <td>{servico.funcionario}</td>
-                      <td>
-                        <button
-                          className="btn btn-success"
-                          onClick={() => handleConfirm(servico.id)}
-                        >
-                          <FaCheck />
-                        </button>
-                        <button
-                          className="btn btn-warning"
-                          onClick={() => handleEdit(servico)}
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => handleDelete(servico.id)}
-                        >
-                          <FaTrash />
-                        </button>
-                      </td>
+                      <td>...</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p>Total: R${total ? total.toFixed(2) : "0.00"}</p>
             </TableServico>
           ) : (
-            <p>Nenhum serviço cadastrado para este cliente.</p>
+            <p>Nenhum serviço cadastrado.</p>
           )}
         </OptionsServicos>
       </DivServicos>
@@ -363,12 +310,12 @@ const Servicos = () => {
                     name="produtoNome"
                     id="servico"
                     className="form-control"
-                    value={selectedServiceName}
+                    value={state.selectedServiceName}
                     onChange={handleServiceChange}
                     required
                   >
                     <option value="">Selecione um serviço</option>
-                    {servicosDisponiveis.map((servico) => (
+                    {state.servicosDisponiveis.map((servico) => (
                       <option key={servico.id} value={servico.nome}>
                         {servico.nome}
                       </option>
@@ -398,8 +345,14 @@ const Servicos = () => {
                   <input
                     type="number"
                     name="quantidade"
-                    value={quantidade}
-                    onChange={(e) => setQuantidade(Number(e.target.value) || 0)} 
+                    value={state.quantidade}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "UPDATE_FIELD",
+                        field: "quantidade",
+                        value: Number(e.target.value) || 0,
+                      })
+                    }
                     required
                   />
                 </div>
@@ -409,7 +362,7 @@ const Servicos = () => {
                     type="number"
                     id="valor"
                     className="form-control"
-                    value={selectedValue}
+                    value={state.selectedValue}
                     readOnly
                   />
                 </div>
@@ -418,8 +371,14 @@ const Servicos = () => {
                   <input
                     type="number"
                     name="desconto"
-                    value={desconto}
-                    onChange={(e) => setDesconto(Number(e.target.value) || 0)}
+                    value={state.desconto}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "UPDATE_FIELD",
+                        field: "desconto",
+                        value: Number(e.target.value) || 0,
+                      })
+                    }
                     step="0.01"
                   />
                 </div>
@@ -435,11 +394,11 @@ const Servicos = () => {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={submitting}
+                  disabled={state.submitting}
                 >
-                  {submitting
+                  {state.submitting
                     ? "Salvando..."
-                    : isEditing
+                    : state.isEditing
                     ? "Atualizar Serviço"
                     : "Adicionar Serviço"}
                 </button>
