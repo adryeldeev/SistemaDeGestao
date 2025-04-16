@@ -5,7 +5,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import { useNavigate, useParams } from "react-router-dom";
 import Buttons from "../../Components/Buttons/Buttons";
 import NavItens from "../../Components/NavItens/NavItens";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   ButtonBuscarServicoCliente,
@@ -230,7 +230,7 @@ const BuscarServicoDoCliente = () => {
       <ContentBuscarServicoCliente>
         <ContainerBuscarServicoCliente>
           <label htmlFor="search" id="search">
-            Qual cliente você procura?
+            Qual serviço você procura?
           </label>
           <input
             type="text"

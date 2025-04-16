@@ -2,8 +2,7 @@
 import axios from 'axios';
 import { useAuth } from '../Context/authHelpers.jsx';
 
-/*export const = 'https://backendsistemasalao.onrender.com';*/
-export const urlApi = 'http://localhost:8000';
+export const urlApi = 'https://backendsistemasalao-production.up.railway.app';
 
 const useApi = () => {
   const { token } = useAuth(); // Obtém o token do contexto

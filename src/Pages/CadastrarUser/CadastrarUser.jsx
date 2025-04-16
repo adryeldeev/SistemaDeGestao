@@ -1,15 +1,21 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FaRegUser } from "react-icons/fa";
 import { AiOutlineMail } from "react-icons/ai";
 import { TbLockPassword } from "react-icons/tb";
-import { ContentCadastro, DivInput, FormCadastro, InfoCadastro, TituloCadastro } from "./CadastrarUserStyled";
-import Button from "../../Components/Button/Button";
-import InputField from './../../Components/InputField/InputField';
+import {
+  ContentCadastro,
+  InfoCadastro,
+  TituloCadastro,
+  FormCadastro,
+  DivInput,
+  Button,
+  Text,
+} from "./CadastrarUserStyled";
 import useApi from "../../Api/Api";
 
 const CadastroUser = () => {
-  const api = useApi()
+  const api = useApi();
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
@@ -29,17 +35,22 @@ const CadastroUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    if (!formData.username || !formData.email || !formData.password || formData.password !== formData.confirmPassword) {
+
+    if (
+      !formData.username ||
+      !formData.email ||
+      !formData.password ||
+      formData.password !== formData.confirmPassword
+    ) {
       setError("Todos os campos são obrigatórios e as senhas devem ser iguais");
       return;
     }
-  
+
     setError("");
-  
+
     try {
-      const response = await api.post("/createUser", formData);  
-  
+      const response = await api.post("/createUser", formData);
+
       if (response.status === 201) {
         navigate("/login"); // Redireciona após sucesso
       } else {
@@ -50,55 +61,58 @@ const CadastroUser = () => {
       setError(err.response?.data?.message || "Erro ao cadastrar usuário");
     }
   };
+
   return (
     <ContentCadastro>
       <InfoCadastro>
-        <TituloCadastro>Cadastra-se</TituloCadastro>
+        <TituloCadastro>Cadastre-se</TituloCadastro>
         <FormCadastro onSubmit={handleSubmit}>
-  <DivInput>
-    <InputField
-      type="text"
-      placeholder="Digite seu nome"
-      id="username"
-      value={formData.username}
-      onChange={handleChange}
-    />
-   <FaRegUser />
-  </DivInput>
-  <DivInput>
-    <InputField
-      type="email"
-      placeholder="Digite seu e-mail"
-      id="email"
-      value={formData.email}
-      onChange={handleChange}
-    />
-    <AiOutlineMail />
-  </DivInput>
-  <DivInput>
-    <InputField
-      type="password"
-      placeholder="Digite sua senha"
-      id="password"
-      value={formData.password}
-      onChange={handleChange}
-    />
-   <TbLockPassword />
-  </DivInput>
-  <DivInput>
-    <InputField
-      type="password"
-      placeholder="Confirme sua senha"
-      id="confirmPassword"
-      value={formData.confirmPassword}
-      onChange={handleChange}
-    />
-   <TbLockPassword />
-  </DivInput>
-  {error && <p style={{ color: "red" }}>{error}</p>}
-  <Button text='Cadastrar' type="submit"/>
-</FormCadastro>
-
+          <DivInput>
+            <FaRegUser />
+            <input
+              type="text"
+              placeholder="Digite seu nome"
+              id="username"
+              value={formData.username}
+              onChange={handleChange}
+            />
+          </DivInput>
+          <DivInput>
+            <AiOutlineMail />
+            <input
+              type="email"
+              placeholder="Digite seu e-mail"
+              id="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </DivInput>
+          <DivInput>
+            <TbLockPassword />
+            <input
+              type="password"
+              placeholder="Digite sua senha"
+              id="password"
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </DivInput>
+          <DivInput>
+            <TbLockPassword />
+            <input
+              type="password"
+              placeholder="Confirme sua senha"
+              id="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+          </DivInput>
+          {error && <p style={{ color: "red" }}>{error}</p>}
+          <Button type="submit">Cadastrar</Button>
+          <Text>
+            Já tem uma conta? <NavLink to="/login">Faça login</NavLink>
+          </Text>
+        </FormCadastro>
       </InfoCadastro>
     </ContentCadastro>
   );

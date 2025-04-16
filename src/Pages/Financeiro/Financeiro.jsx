@@ -24,25 +24,24 @@ const Financeiro = () => {
       setLoading(true);
       try {
         const response = await api.get(
-          `https://backendsistemasalao.onrender.com/financas/total-por-periodo`, 
+          `/financas/total-por-periodo`, 
           {
             params: {
               startDate: startDate,
-              endDate: endDate
-            }
+              endDate: endDate,
+            },
           }
         );
         if (response.status === 200) {
-          console.log(response.data);
           setFinanceData(response.data);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Erro ao buscar dados financeiros:", error);
       } finally {
         setLoading(false);
       }
     }
-
+  
     if (startDate && endDate) {
       fetchData();
     }

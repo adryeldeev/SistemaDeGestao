@@ -3,16 +3,14 @@ import { TbLockPassword } from "react-icons/tb";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
-  ButtonLogin,
   ContentLogin,
-  DivInputsLogin,
-  DivLinks,
-  FormLogin,
-  InfoContentLogin,
-  IconWrapper,
-  InputLogin,
-  LinkPassword,
-  TitleLogin,
+  ContentInfoLogin,
+  Form,
+  InputContainer,
+  Button,
+  Text,
+  TituloCadastro
+
 } from "./LoginStyled";
 import { useAuth } from "../../Context/authHelpers.jsx";
 
@@ -54,46 +52,40 @@ const Login = () => {
 
   return (
     <ContentLogin>
-      <InfoContentLogin>
-        <TitleLogin>Faça seu login</TitleLogin>
-        <FormLogin onSubmit={handleSubmitEvent}>
-          <DivInputsLogin>
-            <IconWrapper>
-              <AiOutlineMail />
-            </IconWrapper>
-            <InputLogin
-              type="email"
-              id="email"
-              placeholder="Email"
-              value={input.email}
-              onChange={handleInputChange}
-            />
-          </DivInputsLogin>
-          <DivInputsLogin>
-            <IconWrapper>
-              <TbLockPassword />
-            </IconWrapper>
-            <InputLogin
-              type="password"
-              id="password"
-              placeholder="Senha"
-              value={input.password}
-              onChange={handleInputChange}
-            />
-          </DivInputsLogin>
-          <ButtonLogin type="submit">Entrar</ButtonLogin>
-        </FormLogin>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <DivLinks>
-          <LinkPassword>
-            Não é cadastrado?{" "}
-            <NavLink to="/cadastrarUser" style={{ color: "#ffc107" }}>
-              Cadastrar-se aqui
-            </NavLink>
-          </LinkPassword>
-          <LinkPassword>Esqueceu a senha?</LinkPassword>
-        </DivLinks>
-      </InfoContentLogin>
+   
+     <ContentInfoLogin>
+      <TituloCadastro>Faça login na sua conta </TituloCadastro>
+      <Form onSubmit={handleSubmitEvent}>
+        <InputContainer>
+          <AiOutlineMail className="icon" />
+          <input
+            type="email"
+            id="email"
+            placeholder="Email"
+            value={input.email}
+            onChange={handleInputChange}
+          />
+        </InputContainer>
+        <InputContainer>
+          <TbLockPassword className="icon" />
+          <input
+            type="password"
+            id="password"
+            placeholder="Senha"
+            value={input.password}
+            onChange={handleInputChange}
+          />
+        </InputContainer>
+        {error && <p className="error">{error}</p>}
+        <Button type="submit">Entrar</Button>
+        <Text className="text">Não tem uma conta? <NavLink to="/cadastrarUser">Crie uma</NavLink></Text>
+        </Form>
+
+     </ContentInfoLogin>
+
+
+
+      
     </ContentLogin>
   );
 };

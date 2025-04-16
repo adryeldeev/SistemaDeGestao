@@ -86,55 +86,48 @@ const Servicos = () => {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      dispatch({ type: "SET_LOADING", payload: true });
-      try {
-        const [servicosResponse, catalogoResponse, clienteResponse] =
-          await Promise.all([
-            api.get(`/servico/cliente/${id}`),
-            api.get("/servico-catalogo"),
-            api.get(`/clientes/${id}`),
-          ]);
+  const fetchInitialData = async () => {
+    dispatch({ type: "SET_LOADING", payload: true });
+    try {
+      const [servicosResponse, catalogoResponse, clienteResponse] =
+        await Promise.all([
+          api.get(`/servico/cliente/${id}`),
+          api.get("/servico-catalogo"),
+          api.get(`/clientes/${id}`),
+        ]);
 
-        if (servicosResponse.status === 200) {
-          const fetchedServicos = Array.isArray(servicosResponse.data)
-            ? servicosResponse.data
-            : [];
-          dispatch({ type: "SET_SERVICOS", payload: fetchedServicos });
-          calculateTotal(fetchedServicos);
-        }
-
-        if (catalogoResponse.status === 200) {
-          const catalogoData =
-            catalogoResponse.data && catalogoResponse.data.data;
-          if (Array.isArray(catalogoData)) {
-            dispatch({ type: "SET_SERVICOS_DISPONIVEIS", payload: catalogoData });
-          }
-        }
-
-        if (clienteResponse.status === 200) {
-          dispatch({ type: "SET_CLIENTE_NOME", payload: clienteResponse.data.nome });
-        }
-      } catch (error) {
-        console.error("Erro ao buscar dados iniciais:", error);
-      } finally {
-        dispatch({ type: "SET_LOADING", payload: false });
+      if (servicosResponse.status === 200) {
+        const fetchedServicos = Array.isArray(servicosResponse.data)
+          ? servicosResponse.data
+          : [];
+        dispatch({ type: "SET_SERVICOS", payload: fetchedServicos });
+        calculateTotal(fetchedServicos);
       }
-    };
 
+      if (catalogoResponse.status === 200) {
+        const catalogoData =
+          catalogoResponse.data && catalogoResponse.data.data;
+        if (Array.isArray(catalogoData)) {
+          dispatch({ type: "SET_SERVICOS_DISPONIVEIS", payload: catalogoData });
+        }
+      }
+
+      if (clienteResponse.status === 200) {
+        dispatch({
+          type: "SET_CLIENTE_NOME",
+          payload: clienteResponse.data.nome,
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao buscar dados iniciais:", error);
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
+  };
+
+  useEffect(() => {
     fetchInitialData();
   }, [id]);
-
-  const calculateTotal = (services) => {
-    const totalValue = services.reduce((acc, servico) => {
-      const valor = parseFloat(servico.valor) || 0;
-      const quantidade = parseInt(servico.quantidade, 10) || 0;
-      const desconto = parseFloat(servico.desconto) || 0;
-      return acc + valor * quantidade - desconto;
-    }, 0);
-    dispatch({ type: "SET_TOTAL", payload: totalValue });
-  };
 
   const handleServiceChange = (e) => {
     const selectedName = e.target.value;
@@ -146,63 +139,42 @@ const Servicos = () => {
       payload: { name: selectedName, value: service ? service.preco : 0 },
     });
   };
-
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      state.selectedValue === undefined ||
-      state.selectedServiceName === "" ||
-      state.clienteNome === undefined
-    ) {
-      alert("Os dados necessários não foram carregados corretamente.");
-      return;
-    }
+  
     if (state.submitting) return;
     dispatch({ type: "SET_SUBMITTING", payload: true });
-
+  
     try {
-      const service = state.servicosDisponiveis.find(
-        (s) => s.nome === state.selectedServiceName
-      );
-      if (!service) {
-        toast.error("Selecione um serviço válido.");
-        return;
-      }
+      // Monta o objeto de dados para envio
       const serviceData = {
-        produtoNome: state.selectedServiceName,
-        realizadoEm: e.target.data.value,
-        horario: e.target.horario.value,
-        quantidade: state.quantidade,
-        valor: state.selectedValue,
-        desconto: state.desconto,
-        funcionario: e.target.funcionario.value,
-        clienteId: Number(id),
+        produtoNome: state.selectedServiceName || state.servicoAtual?.produtoNome, // Mantém o valor atual se não preenchido
+        realizadoEm: e.target.data.value || state.servicoAtual?.realizadoEm, // Mantém o valor atual se não preenchido
+        horario: e.target.horario.value || state.servicoAtual?.horario, // Mantém o valor atual se não preenchido
+        quantidade: state.quantidade || state.servicoAtual?.quantidade, // Mantém o valor atual se não preenchido
+        valor: state.selectedValue || state.servicoAtual?.valor, // Mantém o valor atual se não preenchido
+        desconto: state.desconto || state.servicoAtual?.desconto, // Mantém o valor atual se não preenchido
+        funcionario: e.target.funcionario.value || state.servicoAtual?.funcionario, // Mantém o valor atual se não preenchido
+        clienteId:Number(id)
       };
-
+  
       let response;
       if (state.isEditing && state.servicoAtual) {
+        // Atualiza o serviço existente
         response = await api.put(
           `/updateServico/${state.servicoAtual.id}`,
           serviceData
         );
         toast.success("Serviço atualizado com sucesso!");
       } else {
+        // Cria um novo serviço
         response = await api.post("/criarServico", serviceData);
         toast.success("Serviço cadastrado com sucesso!");
       }
+  
       if (response.status === (state.isEditing ? 200 : 201)) {
-        const updatedService = response.data;
-        dispatch({
-          type: "SET_SERVICOS",
-          payload: state.isEditing
-            ? state.servicos.map((servico) =>
-                servico.id === updatedService.id ? updatedService : servico
-              )
-            : [...state.servicos, updatedService],
-        });
-        calculateTotal(state.servicos);
+        // Atualiza os dados chamando a função de busca inicial
+        await fetchInitialData();
         closeModalAndReset();
       }
     } catch (error) {
@@ -213,13 +185,86 @@ const Servicos = () => {
     }
   };
 
+  const handleEdit = (servico) => {
+    dispatch({
+      type: "SET_SELECTED_SERVICE",
+      payload: { name: servico.produtoNome, value: servico.valor },
+    });
+    dispatch({
+      type: "SET_EDITING",
+      payload: { isEditing: true, servicoAtual: servico },
+    });
+    openModal();
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Você tem certeza que deseja excluir este serviço?")) {
+      try {
+        const response = await api.delete(`/deletarServico/${id}`);
+        if (response.status === 200) {
+          dispatch({
+            type: "SET_SERVICOS",
+            payload: state.servicos.filter((servico) => servico.id !== id),
+          });
+          calculateTotal(state.servicos);
+          toast.success("Serviço excluído com sucesso!");
+        }
+      } catch (error) {
+        console.error("Erro ao excluir serviço:", error);
+        toast.error("Erro ao excluir serviço.");
+      }
+    }
+  };
+  const calculateTotal = (services) => {
+    const totalValue = services.reduce((acc, servico) => {
+      const valor = parseFloat(servico.valor) || 0;
+      const quantidade = parseInt(servico.quantidade, 10) || 0;
+      const desconto = parseFloat(servico.desconto) || 0;
+      return acc + valor * quantidade - desconto;
+    }, 0);
+    dispatch({ type: "SET_TOTAL", payload: totalValue });
+  };
+
+  useEffect(() => {
+    calculateTotal(state.servicos);
+  }, [state.servicos]);
+
+  const handleConfirm = async (id) => {
+    const servico = state.servicos.find((servico) => servico.id === id);
+    if (servico && servico.realizado) {
+      toast.info("Este serviço já foi confirmado!");
+    return; // Interrompe o fluxo
+    }
+      if(window.confirm("Você tem certeza que deseja confirmar este serviço?")) {
+        try {
+          const response = await api.put(`/confirmarServico/${id}`);
+          if (response.status === 200 || response.status === 201) {
+            dispatch({
+              type: "SET_SERVICOS",
+              payload: state.servicos.map((servico) =>
+                servico.id === id ? { ...servico, realizado: true } : servico
+              ),
+            });
+            toast.success("Serviço confirmado com sucesso!");
+          }
+        } catch (error) {
+          console.error("Erro ao confirmar serviço:", error);
+          toast.error("Erro ao confirmar serviço.");
+        }
+      }
+  };
+
   const closeModalAndReset = () => {
     dispatch({ type: "RESET_FORM" });
     closeModal();
   };
 
   if (state.loading) return <p>Carregando...</p>;
-  if (!state.servicos || !state.servicosDisponiveis || state.clienteNome === undefined) {
+  if (
+    !state.servicos ||
+    !state.servicosDisponiveis ||
+    state.clienteNome === undefined
+  ) {
     return <div>Carregando dados necessários...</div>;
   }
 
@@ -280,14 +325,36 @@ const Servicos = () => {
                     <tr key={servico.id}>
                       <td>{servico.id}</td>
                       <td>{servico.produtoNome}</td>
-                      <td>{servico.realizadoEm}</td>
+                      <td>
+                        {new Date(servico.realizadoEm).toLocaleDateString("pt-BR")}</td>
                       <td>{servico.horario}</td>
                       <td>{servico.quantidade}</td>
                       <td>{servico.valor}</td>
                       <td>{servico.desconto}</td>
-                      <td>{servico.total}</td>
+                      <td>
+                        {servico.valor * servico.quantidade - servico.desconto}
+                      </td>
                       <td>{servico.funcionario}</td>
-                      <td>...</td>
+                      <td>
+                        <button
+                          className="btn btn-success"
+                          onClick={() => handleConfirm(servico.id)}
+                        >
+                          <FaCheck />
+                        </button>
+                        <button
+                          className="btn btn-warning"
+                          onClick={() => handleEdit(servico)}
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          onClick={() => handleDelete(servico.id)}
+                        >
+                          <FaTrash />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -312,7 +379,7 @@ const Servicos = () => {
                     className="form-control"
                     value={state.selectedServiceName}
                     onChange={handleServiceChange}
-                    required
+                    
                   >
                     <option value="">Selecione um serviço</option>
                     {state.servicosDisponiveis.map((servico) => (
@@ -328,7 +395,7 @@ const Servicos = () => {
                     type="date"
                     id="data"
                     className="form-control"
-                    required
+                    
                   />
                 </div>
                 <div className="form-group">
@@ -337,7 +404,7 @@ const Servicos = () => {
                     type="time"
                     id="horario"
                     className="form-control"
-                    required
+                    
                   />
                 </div>
                 <div className="form-group">
@@ -353,7 +420,7 @@ const Servicos = () => {
                         value: Number(e.target.value) || 0,
                       })
                     }
-                    required
+                    
                   />
                 </div>
                 <div className="form-group">
@@ -388,7 +455,7 @@ const Servicos = () => {
                     type="text"
                     id="funcionario"
                     className="form-control"
-                    required
+                    
                   />
                 </div>
                 <button

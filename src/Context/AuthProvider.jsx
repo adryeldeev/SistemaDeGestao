@@ -17,7 +17,7 @@ const AuthProvider = ({ children }) => {
     setError("");
     try {
       
-      const response = await axios.post("https://backendsistemasalao.onrender.com/login", data, {
+      const response = await axios.post("https://backendsistemasalao-production.up.railway.app/login", data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -51,7 +51,7 @@ const AuthProvider = ({ children }) => {
     const validateToken = async () => {
       if (token) {
         try {
-          const response = await axios.get("https://backendsistemasalao.onrender.com/validation", {
+          const response = await axios.get("https://backendsistemasalao-production.up.railway.app/validation", {
             headers: { Authorization: `Bearer ${token}` },
           });
           setUser(response.data.userData);
